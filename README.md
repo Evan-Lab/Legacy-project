@@ -1,1 +1,1 @@
-# Legacy-project
+# Legacy Project
