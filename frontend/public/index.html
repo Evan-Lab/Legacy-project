@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Genealogical database - 555SAMPLE</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <div class="tree" aria-hidden="true">🌳</div>
+      <h1>Genealogical database</h1>
+      <h2>555SAMPLE</h2>
+      <div class="subtitle">
+        3 individuals <span class="badge" title="sample">🔹</span>
+      </div>
+    </header>
+
+    <main class="container">
+      <!-- Search -->
+      <section class="search-card">
+        <div class="search-inputs">
+          <div class="input-wrap">
+            <span class="help" title="Help">❔</span>
+            <input
+              id="q"
+              type="text"
+              placeholder="Search individual, surname, public name, alias, key"
+            />
+          </div>
+
+          <div class="fields-row">
+            <input id="firstName" type="text" placeholder="First name·s" />
+            <input id="surname" type="text" placeholder="Surname" />
+          </div>
+
+          <div class="options-row">
+            <div class="first-names">
+              <div class="legend">First names:</div>
+              <label
+                ><input type="checkbox" id="oneFirst" /> One first name</label
+              >
+              <label><input type="checkbox" id="sameOrder" /> Same order</label>
+              <label><input type="checkbox" id="partial" /> Partial</label>
+            </div>
+            <button id="searchBtn" class="btn btn-primary">🔍 Search</button>
+          </div>
+        </div>
+
+        <div class="table-head">
+          <div class="th">Title</div>
+          <div class="th">Fief</div>
+        </div>
+      </section>
+
+      <!-- Tools -->
+      <section class="panel">
+        <h3>🛠️ Tools</h3>
+        <div class="chips">
+          <button class="chip"><span>📝</span> Add notes</button>
+          <button class="chip"><span>📊</span> Statistics</button>
+          <button class="chip"><span>🎉</span> Anniversaries</button>
+          <button class="chip"><span>🌐</span> Places/surname</button>
+          <button class="chip"><span>🔎</span> Advanced request</button>
+          <button class="chip"><span>📅</span> Calendars</button>
+          <button class="chip"><span>⚙️</span> Configuration</button>
+          <button class="chip"><span>➕</span> Add note</button>
+          <button class="chip"><span>👪</span> Add family</button>
+        </div>
+      </section>
+
+      <!-- Books -->
+      <section class="panel">
+        <h3>📚 Books</h3>
+        <div class="chips">
+          <button class="chip"><span>🧒</span> First names</button>
+          <button class="chip"><span>📛</span> Surnames</button>
+          <button class="chip"><span>🏷️</span> Public names</button>
+          <button class="chip"><span>🏅</span> Qualifiers</button>
+          <button class="chip"><span>🎭</span> Aliases</button>
+          <button class="chip"><span>💼</span> Occupations</button>
+          <button class="chip"><span>🗺️</span> Places</button>
+          <button class="chip"><span>📜</span> Sources</button>
+          <button class="chip"><span>🎖️</span> Titles</button>
+          <button class="chip"><span>🏰</span> Domains</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="lang">EN <span class="carret">▾</span></div>
+      <div class="meta">
+        <a class="badge soft" href="#" title="version">GeneWeb v. 7.1-beta</a>
+        <span>© INRIA 1998-2007</span>
+        <a class="badge soft" href="#" title="repo">GitHub</a>
+      </div>
+    </footer>
+
+    <script src="./js/index.js"></script>
+  </body>
+</html>
