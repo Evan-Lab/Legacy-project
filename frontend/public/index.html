@@ -3,99 +3,256 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Genealogical database - 555SAMPLE</title>
+    <title>Genealogical database Project</title>
     <link rel="stylesheet" href="./styles.css" />
+    <style>
+      .sr-only {
+        position: absolute !important;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      .skip-link {
+        position: absolute;
+        left: -9999px;
+        top: auto;
+      }
+      .skip-link:focus {
+        left: 16px;
+        top: 16px;
+        background: #fff;
+        padding: 8px 12px;
+        border: 2px solid #000;
+        z-index: 1000;
+      }
+      input:focus-visible,
+      button:focus-visible,
+      a:focus-visible {
+        outline: 3px solid #2563eb;
+        outline-offset: 2px;
+      }
+      [aria-invalid="true"] {
+        border-color: #b00020;
+      }
+      .hint {
+        color: #6b7280;
+        font-size: 0.9rem;
+        margin: 0.25rem 0 0;
+      }
+    </style>
   </head>
   <body>
-    <header class="hero">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="hero" role="banner">
       <div class="tree" aria-hidden="true">🌳</div>
       <h1>Genealogical database</h1>
-      <h2>555SAMPLE</h2>
+      <h2>Exemple Database</h2>
       <div class="subtitle">
-        3 individuals <span class="badge" title="sample">🔹</span>
+        <span aria-live="polite">3 individuals</span>
+        <span class="badge" title="sample" aria-hidden="true"></span>
       </div>
     </header>
 
-    <main class="container">
-      <!-- Search -->
-      <section class="search-card">
+    <main id="main" class="container" role="main">
+      <form
+        class="search-card"
+        role="search"
+        aria-labelledby="search-title"
+        action="#"
+        onsubmit="return false"
+      >
+        <h3 id="search-title" class="sr-only">Search individuals</h3>
+
         <div class="search-inputs">
           <div class="input-wrap">
-            <span class="help" title="Help">❔</span>
+            <span class="help" title="Help" aria-hidden="true"></span>
+
+            <label class="sr-only" for="q"
+              >Search (individual, surname, public name, alias, key)</label
+            >
             <input
               id="q"
-              type="text"
+              name="q"
+              type="search"
+              inputmode="search"
               placeholder="Search individual, surname, public name, alias, key"
+              aria-describedby="q-hint"
+              autocomplete="off"
             />
+            <p id="q-hint" class="hint">
+              Type a name or keyword, then press Enter.
+            </p>
           </div>
 
           <div class="fields-row">
-            <input id="firstName" type="text" placeholder="First name·s" />
-            <input id="surname" type="text" placeholder="Surname" />
-          </div>
-
-          <div class="options-row">
-            <div class="first-names">
-              <div class="legend">First names:</div>
-              <label
-                ><input type="checkbox" id="oneFirst" /> One first name</label
-              >
-              <label><input type="checkbox" id="sameOrder" /> Same order</label>
-              <label><input type="checkbox" id="partial" /> Partial</label>
+            <div class="input-wrap">
+              <label for="firstName">First name(s)</label>
+              <input
+                id="firstName"
+                name="firstName"
+                type="search"
+                inputmode="search"
+                placeholder="e.g. John Paul"
+                list="datalist_fnames"
+                autocomplete="given-name"
+                aria-describedby="firstName-hint"
+              />
+              <datalist id="datalist_fnames">
+                <option value="John"></option>
+                <option value="Jane"></option>
+              </datalist>
+              <p id="firstName-hint" class="hint">
+                You can enter one or more first names.
+              </p>
             </div>
-            <button id="searchBtn" class="btn btn-primary">🔍 Search</button>
+
+            <div class="input-wrap">
+              <label for="surname">Surname</label>
+              <input
+                id="surname"
+                name="surname"
+                type="search"
+                inputmode="search"
+                placeholder="e.g. Doe"
+                autocomplete="family-name"
+              />
+            </div>
           </div>
+
+          <fieldset class="options-row" aria-describedby="firstnames-opts-hint">
+            <legend>First names options</legend>
+            <label
+              ><input type="checkbox" id="oneFirst" name="oneFirst" /> One first
+              name</label
+            >
+            <label
+              ><input type="checkbox" id="sameOrder" name="sameOrder" /> Same
+              order</label
+            >
+            <label
+              ><input type="checkbox" id="partial" name="partial" />
+              Partial</label
+            >
+            <p id="firstnames-opts-hint" class="hint">
+              Choose how first names are matched.
+            </p>
+
+            <button id="searchBtn" type="submit" class="btn btn-primary">
+              Search
+            </button>
+          </fieldset>
         </div>
 
-        <div class="table-head">
-          <div class="th">Title</div>
-          <div class="th">Fief</div>
+        <table class="results-head" aria-hidden="true">
+          <thead>
+            <tr>
+              <th scope="col">Title</th>
+              <th scope="col">Fief</th>
+            </tr>
+          </thead>
+        </table>
+
+        <div
+          id="results-status"
+          class="sr-only"
+          aria-live="polite"
+          aria-atomic="true"
+        ></div>
+        <ul id="results-list" role="list" aria-label="Search results"></ul>
+      </form>
+
+      <section class="panel" aria-labelledby="tools-title">
+        <h3 id="tools-title">Tools</h3>
+        <div class="chips" role="group" aria-label="Tools">
+          <button class="chip" type="button">
+            <span aria-hidden="true">📝</span> Add notes
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">📊</span> Statistics
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">🎉</span> Anniversaries
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">🌐</span> Places/surname
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">🔎</span> Advanced request
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">📅</span> Calendars
+          </button>
+          <button class="chip" type="button" aria-label="Configuration">
+            <span aria-hidden="true">⚙️</span> Configuration
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">➕</span> Add note
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">👪</span> Add family
+          </button>
         </div>
       </section>
 
-      <!-- Tools -->
-      <section class="panel">
-        <h3>🛠️ Tools</h3>
-        <div class="chips">
-          <button class="chip"><span>📝</span> Add notes</button>
-          <button class="chip"><span>📊</span> Statistics</button>
-          <button class="chip"><span>🎉</span> Anniversaries</button>
-          <button class="chip"><span>🌐</span> Places/surname</button>
-          <button class="chip"><span>🔎</span> Advanced request</button>
-          <button class="chip"><span>📅</span> Calendars</button>
-          <button class="chip"><span>⚙️</span> Configuration</button>
-          <button class="chip"><span>➕</span> Add note</button>
-          <button class="chip"><span>👪</span> Add family</button>
-        </div>
-      </section>
-
-      <!-- Books -->
-      <section class="panel">
-        <h3>📚 Books</h3>
-        <div class="chips">
-          <button class="chip"><span>🧒</span> First names</button>
-          <button class="chip"><span>📛</span> Surnames</button>
-          <button class="chip"><span>🏷️</span> Public names</button>
-          <button class="chip"><span>🏅</span> Qualifiers</button>
-          <button class="chip"><span>🎭</span> Aliases</button>
-          <button class="chip"><span>💼</span> Occupations</button>
-          <button class="chip"><span>🗺️</span> Places</button>
-          <button class="chip"><span>📜</span> Sources</button>
-          <button class="chip"><span>🎖️</span> Titles</button>
-          <button class="chip"><span>🏰</span> Domains</button>
+      <section class="panel" aria-labelledby="books-title">
+        <h3 id="books-title">Books</h3>
+        <div class="chips" role="group" aria-label="Books">
+          <button class="chip" type="button">
+            <span aria-hidden="true">🧒</span> First names
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">📛</span> Surnames
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">🏷️</span> Public names
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">🏅</span> Qualifiers
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">🎭</span> Aliases
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">💼</span> Occupations
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">🗺️</span> Places
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">📜</span> Sources
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">🎖️</span> Titles
+          </button>
+          <button class="chip" type="button">
+            <span aria-hidden="true">🏰</span> Domains
+          </button>
         </div>
       </section>
     </main>
 
-    <footer class="footer">
-      <div class="lang">EN <span class="carret">▾</span></div>
-      <div class="meta">
-        <a class="badge soft" href="#" title="version">GeneWeb v. 7.1-beta</a>
-        <span>© INRIA 1998-2007</span>
-        <a class="badge soft" href="#" title="repo">GitHub</a>
-      </div>
-    </footer>
-
     <script src="./js/index.js"></script>
+    <script>
+      (function () {
+        const form = document.querySelector('form[role="search"]');
+        const status = document.getElementById("results-status");
+        const list = document.getElementById("results-list");
+        form?.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const q = document.getElementById("q")?.value?.trim() || "";
+          const items = q ? [`Result for "${q}"`] : [];
+          list.innerHTML = items.map((i) => `<li>${i}</li>`).join("");
+          status.textContent = `${items.length} result${
+            items.length !== 1 ? "s" : ""
+          }`;
+        });
+      })();
+    </script>
   </body>
 </html>
