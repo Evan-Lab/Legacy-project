@@ -80,32 +80,33 @@ Apple provides a security mechanism preventing users from executing applications
 which are not provided by authenticated developers. Such applications cannot be started
 by double-clicking on their icons.
 Apple provides a two-step mechanism circumventing this security:
-* Right-click on the application icon (```gwd``` and ```gwsetup```). This will pop-up a window
-mentioning the security issue and providing an "open" button. Click on this button to open
-the application. Ignore the resulting messages as no parameters were provided.
-* Once ```gwd``` and ```gwsetup``` have been started in this fashion, they will be white-listed
-on your machine and subsequent opens will succeed.
 
-After white-listing ```gwd``` and ```gwsetup```, double-click on the ```geneweb.command```
+- Right-click on the application icon (`gwd` and `gwsetup`). This will pop-up a window
+  mentioning the security issue and providing an "open" button. Click on this button to open
+  the application. Ignore the resulting messages as no parameters were provided.
+- Once `gwd` and `gwsetup` have been started in this fashion, they will be white-listed
+  on your machine and subsequent opens will succeed.
+
+After white-listing `gwd` and `gwsetup`, double-click on the `geneweb.command`
 file which will launch both servers with appropriate parameters.
 With the configuration provided in this launch command, the bases are located in
-the ```bases``` folder.
+the `bases` folder.
 You may reorganize your folder structure (and launch command) as described in the
 documentation at https://geneweb.tuxfamily.org/.
 
 ### Linux
 
 Quite similar to the MacOS solution, without the security check.
-```xxx.command``` files have an equivalent ```xxx.sh``` variant.
+`xxx.command` files have an equivalent `xxx.sh` variant.
 
 ## Resources
 
-* Documentation: https://geneweb.tuxfamily.org/wiki/GeneWeb
-* Mailing list: https://framalistes.org/sympa/subscribe/geneweb
-* IRC: irc://irc.libera.chat/geneweb
-* Git: https://github.com/geneweb/geneweb
-* Forum: https://www.geneanet.org/forum/GeneWeb-85
-* Wikipedia: https://en.wikipedia.org/wiki/GeneWeb
+- Documentation: https://geneweb.tuxfamily.org/wiki/GeneWeb
+- Mailing list: https://framalistes.org/sympa/subscribe/geneweb
+- IRC: irc://irc.libera.chat/geneweb
+- Git: https://github.com/geneweb/geneweb
+- Forum: https://www.geneanet.org/forum/GeneWeb-85
+- Wikipedia: https://en.wikipedia.org/wiki/GeneWeb
 
 ## Contribute
 
@@ -126,12 +127,12 @@ See [geneweb.opam](./geneweb.opam).
    $ make clean distrib
    ```
 
-
 # Updated instruction for launch with a db
 
-In the folder gw, 
+In the folder distribution and gw,
 
-Write 
+Write
+
 ```
 ./gwd -bd . -hd .
 ```
@@ -141,6 +142,7 @@ And go to this url
 http://localhost:2317/555Sample
 
 You can have a description of available configuration options using
+
 ```
 $ ocaml ./configure.ml --help
 ```
