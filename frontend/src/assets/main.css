@@ -1,0 +1,251 @@
+:root {
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --text: #111827;
+  --muted: #4b5563;
+  --line: #e5e7eb;
+  --soft: #f9fafb;
+  --primary: #0a58ca;
+  --danger: #b00020;
+
+  --radius: 16px;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+  --focus: 3px solid #0a58ca;
+  --focus-offset: 2px;
+
+  --container: 980px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg);
+  line-height: 1.5;
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: var(--focus);
+  outline-offset: var(--focus-offset);
+}
+
+[aria-invalid="true"] {
+  border-color: var(--danger);
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.hint {
+  color: var(--muted);
+  font-size: 0.95rem;
+  margin: 0.25rem 0 0;
+}
+.error {
+  color: var(--danger);
+  margin: 0.25rem 0 0;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+}
+.skip-link:focus {
+  left: 16px;
+  top: 16px;
+  background: #fff;
+  padding: 8px 12px;
+  border: 2px solid #000;
+  z-index: 1000;
+}
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: var(--space-6) var(--space-4) var(--space-3);
+}
+.hero .tree {
+  font-size: 64px;
+  line-height: 1;
+}
+.hero h1 {
+  margin: 8px 0 0;
+  font-size: 32px;
+  font-weight: 800;
+}
+.hero h2 {
+  margin: 4px 0 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+.subtitle {
+  margin-top: 6px;
+  color: var(--muted);
+}
+.badge {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 12px;
+  border-radius: 999px;
+  background: var(--soft);
+}
+
+/* Layout */
+.container {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: var(--space-4);
+}
+.search-card,
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  box-shadow: var(--shadow);
+}
+
+/* Form */
+.search-inputs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.input-wrap {
+  position: relative;
+}
+
+.search-inputs input[type="text"],
+.search-inputs input[type="search"] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-size: 16px;
+}
+
+.fields-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+@media (max-width: 720px) {
+  .fields-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.options-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* Buttons */
+.btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn:hover {
+  background: var(--soft);
+}
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+}
+.btn-primary:hover {
+  background: var(--primary);
+  filter: brightness(1.05);
+}
+
+/* Results */
+.results-head {
+  margin-top: var(--space-3);
+  width: 100%;
+}
+.results-head th {
+  text-align: left;
+  padding-top: var(--space-2);
+  color: var(--muted);
+}
+
+/* Panels */
+.panel {
+  margin-top: var(--space-4);
+}
+.panel h3 {
+  margin: 0 0 var(--space-3);
+  font-size: 18px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.chip {
+  border: 1px solid var(--line);
+  background: var(--soft);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.chip:hover {
+  background: #ececec;
+}
+
+/* Footer (si besoin plus tard) */
+.footer {
+  max-width: var(--container);
+  margin: var(--space-5) auto var(--space-6);
+  padding: 0 var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--muted);
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.footer .badge.soft {
+  background: var(--soft);
+  padding: 4px 8px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: inherit;
+}
