@@ -19,3 +19,7 @@ class BaseRepo:
 
     def get(self, base_id: int) -> Base | None:
         return self.session.get_one(Base, base_id)
+
+    def get_by_name(self, name: str) -> Base | None:
+        statement = select(Base).where(Base.name == name)
+        return self.session.exec(statement).one_or_none()
