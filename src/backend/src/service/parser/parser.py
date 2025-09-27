@@ -1,7 +1,19 @@
-from pathlib import Path
-from src.models.models import Individual
-from .gedcom import parse_gedcom
+from typing import Protocol
 
-class ParserService:
-    def parse_gedcom(self, file_path: Path) -> list[Individual]:
-        return parse_gedcom(file_path)
+from src.models.models import Base
+from src.utils.files import ImportedFile
+
+
+class ParserService(Protocol):
+    def parse(self) -> Base: ...
+
+
+def get_parser(file: ImportedFile, name: str) -> ParserService:
+    match file.format:
+        case "ged":
+            from src.service.parser.gedcom import GEDCOMParser
+
+            return GEDCOMParser(file, name)
+        case _:
+            raise ValueError(f"Unsupported format: {file.format}")
+    return None

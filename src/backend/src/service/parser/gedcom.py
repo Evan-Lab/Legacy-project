@@ -2,25 +2,29 @@ from pathlib import Path
 from gedcom.parser import Parser
 from gedcom.element.individual import IndividualElement
 
-from src.models import Individual
+from src.models import Base, Individual
+from src.utils.files import ImportedFile
 
-def parse_gedcom(path: Path) -> list[Individual]:
-    parser = Parser()
 
-    parser.parse_file(path)
 
-    e = parser.get_element_list()
+class GEDCOMParser:
+    def __init__(self, file: ImportedFile, name: str) -> None:
+        self.file = file
+        self.parser = Parser()
+        self.base = Base(name=name)
 
-    individuals: list[Individual] = []
+    def parse_individual(self, elem: IndividualElement) -> None:
+        name, surname = elem.get_name()
+        is_individual = elem.is_individual()
+        if not is_individual:
+            print(f"wtf {name} {surname} is not individual")
+            return
+        individual = Individual(name=name, surname=surname)
+        self.base.individuals.append(individual)
 
-    for elem in e:
-        if isinstance(elem, IndividualElement):
-            name, surname = elem.get_name()
-            is_individual = elem.is_individual()
-            if not is_individual:
-                print(f"wtf {name} {surname} is not individual")
-                continue
-            individual = Individual(name=name, surname=surname)
-            individuals.append(individual)
-
-    return individuals
+    def parse(self) -> Base:
+        self.parser.parse_file(self.file.path)
+        for elem in self.parser.get_element_list():
+            if isinstance(elem, IndividualElement):
+                self.parse_individual(elem)
+        return self.base

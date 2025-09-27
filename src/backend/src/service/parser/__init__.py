@@ -1,1 +1,1 @@
-from .parser import ParserService
+from .parser import get_parser

@@ -1,21 +1,28 @@
-from __future__ import annotations
-
-from datetime import UTC, datetime
 from enum import Enum
 
-from sqlalchemy import Column
-from sqlalchemy.sql.sqltypes import Enum as SAEnum
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
 
 
 class PartnerRole(str, Enum):
     HUSB = "HUSB"
     WIFE = "WIFE"
 
-class Individual(SQLModel, table=True):
-    __tablename__ = "individual" # type: ignore
+
+class Base(SQLModel, table=True):
+    __tablename__ = "base"  # type: ignore
 
     id: int | None = Field(default=None, primary_key=True)
+    name: str = Field(nullable=False, unique=True, index=True)
+
+    individuals: list['Individual'] = Relationship(back_populates="base")
+
+
+class Individual(SQLModel, table=True):
+    __tablename__ = "individual"  # type: ignore
+
+    id: int | None = Field(default=None, primary_key=True)
+    base_id: int | None = Field(default=None, foreign_key="base.id", nullable=False)
+    base: Base | None = Relationship(back_populates="individuals")
     name: str | None = Field(default=None, nullable=True)
     given_name: str | None = Field(default=None, nullable=True)
     surname: str | None = Field(default=None, nullable=True)

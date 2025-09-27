@@ -13,7 +13,7 @@ def init_db(migrate: bool = True):
     settings = get_settings()
 
     connect_args = {"check_same_thread": False}
-    engine = create_engine(settings.database.url, connect_args=connect_args)
+    engine = create_engine(settings.database.url, connect_args=connect_args, echo=True)
 
     if migrate:
         create_db_and_tables()
