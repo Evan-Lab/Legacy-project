@@ -1,10 +1,9 @@
 import uuid
 from enum import Enum
 from pathlib import Path
-from typing import IO, Any, BinaryIO
+from typing import IO, Any
 
 from src.config import get_settings
-from src.models import Base
 
 
 class Format(str, Enum):
