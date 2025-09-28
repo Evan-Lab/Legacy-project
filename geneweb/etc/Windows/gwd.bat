@@ -1,1 +1,0 @@
-start "GeneWeb server" /min gw\gwd -blang -log "<stderr>" >> log.txt
