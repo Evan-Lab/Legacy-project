@@ -1,0 +1,6 @@
+build-env: DUNE_PROFILE = "release"
+
+build: [
+  [ "ocaml" "./configure.ml" "--release" ]
+  [ make "build" ]
+]

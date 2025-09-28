@@ -1,0 +1,197 @@
+name: GeneWeb CI
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - 'etc/**'
+      - 'hd/**'
+      - 'man/**'
+      - '**/*.md'
+      - 'geneweb_colab.ipynb'
+      - 'ICHANGES'
+      - 'INSTALL'
+      - 'LICENSE'
+      - 'CHANGES'
+      - '.gitattributes'
+      - '.gitignore'
+      - '.git-blame-ignore-revs'
+      - '.ocamlformat'
+      - '.ocamlformat-ignore'
+      - 'geneweb.iss'
+      - 'geneweb.opam.template'
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - 'etc/**'
+      - 'hd/**'
+      - 'man/**'
+      - '**/*.md'
+      - 'geneweb_colab.ipynb'
+      - 'ICHANGES'
+      - 'INSTALL'
+      - 'LICENSE'
+      - 'CHANGES'
+      - '.gitattributes'
+      - '.gitignore'
+      - '.git-blame-ignore-revs'
+      - '.ocamlformat'
+      - '.ocamlformat-ignore'
+      - 'geneweb.iss'
+      - 'geneweb.opam.template'
+
+env:
+  OPAMYES: true
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-15, windows-2022]
+        ocaml-compiler: [4.14.2, 5.3.0]
+        setup-version: [v3]
+        include:
+          - os: ubuntu-22.04
+            ocaml-compiler: 4.08.1
+            setup-version: v2
+
+    outputs:
+      total_matrix_jobs: ${{ strategy.job-total || 0 }}
+      metric: ${{ steps.collect-metrics.outputs.metric }}
+
+    env:
+      USE_NNP: ${{ !startsWith(matrix.os, 'windows') && (matrix.ocaml-compiler == '4.14.2' || startsWith(matrix.ocaml-compiler, '5')) }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Start Build Timer
+        uses: ./.github/actions/ci-utils
+        with:
+          command: start-timer
+
+      - name: Update apt cache (Ubuntu only)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get update
+
+      - name: Configure Git for Windows
+        if: runner.os == 'Windows'
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+          git config --global core.ignorecase false
+          git config --global core.filemode false
+        shell: bash
+
+      - name: Cache Opam dependencies (Unix)
+        id: cache-opam-unix
+        if: runner.os != 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: ~/.opam
+          key: ${{ runner.os }}-unix-${{ matrix.ocaml-compiler }}-${{ matrix.setup-version }}-${{ hashFiles('*.opam') }}-cache
+          restore-keys: ${{ runner.os }}-unix-${{ matrix.ocaml-compiler }}-${{ matrix.setup-version }}
+
+      - name: Cache Opam dependencies (Windows)
+        id: cache-opam-windows
+        if: runner.os == 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: D:\.opam
+          key: windows-${{ matrix.ocaml-compiler }}-${{ matrix.setup-version }}-${{ hashFiles('*.opam') }}-cache
+          restore-keys: windows-${{ matrix.ocaml-compiler }}-${{ matrix.setup-version }}
+
+      - name: Setup Ocaml with v2
+        if: matrix.setup-version == 'v2'
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+
+      - name: Setup Ocaml with v3
+        if: matrix.setup-version == 'v3'
+        uses: ocaml/setup-ocaml@v3.4.0
+        with:
+          ocaml-compiler: ${{ (!startsWith(matrix.os, 'windows') && matrix.ocaml-compiler == '4.14.2') && 'ocaml-variants.4.14.2+options,ocaml-option-nnp' || matrix.ocaml-compiler }}
+
+      - name: Install Perl dependencies (Windows @v3)
+        if: runner.os == 'Windows' && matrix.setup-version == 'v3'
+        run: cpan -j .github/ci-config/cpan-config.pm -T -f -i String::ShellQuote IPC::System::Simple;
+        shell: bash
+
+      - name: Install Geneweb dependencies
+        run: opam install . --deps-only --with-test
+
+      - name: Install ancient dependency
+        if: env.USE_NNP == 'true'
+        run: opam install ancient
+
+      - name: Configure
+        run: opam exec -- ocaml ./configure.ml --sosa-zarith ${{ env.USE_NNP == 'true' && '--gwd-caching' || '' }}
+
+      - name: Build Geneweb
+        id: build
+        shell: bash
+        run: opam exec -- make distrib
+
+      - name: Run tests
+        id: tests
+        shell: bash
+        run: |
+          opam exec -- make ci 2>&1 | tee build-output.log
+
+          set +e
+          PASSED=$(grep -c "\[OK\]" build-output.log)
+          FAILED=$(grep -c "\[FAIL\]" build-output.log)
+          SKIPPED=$(grep -c "\[SKIP\]" build-output.log)
+          set -e
+          TOTAL=$((PASSED + FAILED + SKIPPED))
+          echo "tests_passed=$PASSED" >> $GITHUB_OUTPUT
+          echo "tests_failed=$FAILED" >> $GITHUB_OUTPUT
+          echo "tests_skipped=$SKIPPED" >> $GITHUB_OUTPUT
+          echo "tests_total=$TOTAL" >> $GITHUB_OUTPUT
+
+      - name: "Test Geneweb daemon with --cache-in-memory"
+        if: env.USE_NNP == 'true'
+        run: |
+          output=$(distribution/gw/gwd -cache-in-memory testing 2>&1)
+          if echo "$output" | grep -q "Caching database testing in memory"; then
+            echo "Caching message found, test passed."
+            exit 0
+          else
+            echo "Caching message not found, test failed."
+            exit 1
+          fi
+
+      - name: Collect Build Metrics
+        id: collect-metrics
+        uses: ./.github/actions/ci-utils
+        with:
+          command: collect-metrics
+          os: ${{ matrix.os }}
+          ocaml-version: ${{ matrix.ocaml-compiler }}
+          cache-hit: ${{ runner.os != 'Windows' && steps.cache-opam-unix.outputs.cache-hit || steps.cache-opam-windows.outputs.cache-hit }}
+          tests-total: ${{ steps.tests.outputs.tests_total }}
+          tests-passed: ${{ steps.tests.outputs.tests_passed }}
+          tests-failed: ${{ steps.tests.outputs.tests_failed }}
+          tests-skipped: ${{ steps.tests.outputs.tests_skipped }}
+
+  build-results:
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Generate Build Summary
+        uses: ./.github/actions/ci-utils
+        with:
+          command: generate-summary
+          total-builds: ${{ needs.build.outputs.total_matrix_jobs }}

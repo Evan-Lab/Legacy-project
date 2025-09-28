@@ -1,0 +1,1369 @@
+Internal, very small, undocumented, or invisible changes
+********************************************************
+
+GeneWeb Version 5.02
+--------------------
+
+GeneWeb Version 5.00
+--------------------
+
+Preliminary remark: I neglected to record the Internal changes between
+version 4.10 and 01 Jul 2005, but there are a lot of them... I add
+them when I have some time (and some courage).
+
+* GeneWeb server or CGI (gwd)
+  - [11 Dec 05] In update family form, when creating a new person, if
+    conflict, display now at most 50 persons.
+  - [04 Sep 05] Data base forum file can be split in several files:
+    forum, forum.1, forum.2, and so on.
+  - [27 Aug 05] In marriage relation kind added "no sex check married".
+  - [22 Aug 05] Changed behaviour of displaying a surname : grouping
+    branches when grandchildren have same name (and not children).
+  - [15 Aug 05] Added some shortcuts ("Alt-U" for "update", "Alt-P"
+    for (update) "Person" and ""Alt-F" for "Update family"...)
+  - [08 Aug 05] Fixed bug: in normal access, in personal page,
+    some displayed children could have "x x" and not all for
+    however visible children. Due to combination of authorized_age
+    in perso.ml and fast_auth_age in util.ml (2nd useless and
+    perturbating).
+  - [14 Jul 05] Fixed small bug: URL without index (";opt=no_index")
+    displayed "oc=" twice.
+
+* Consanguinity computing (consang)
+  - [02 Jul 05] Fixed bug: when number of persons was greater than 1M,
+    the consang applied to a *modified* database failed by "Segmentation
+    fault" after the message "*** read persons". Bug at creation of
+    database. This was due to initial bad save of array header (OCaml
+    integer overflowed on sign).
+
+* Dag2html
+  - [14 Aug 05] Fixed bug. Sometimes horiz bar linking two mates did
+    not appear in case of children exchange to nearer them. Had some
+    influence in relationship links "shortest path" because of cleaning
+    up the code by unifying parts coded differently.
+
+* Setup program (gwsetup)
+  - [06 Dec 05] Added option -only to set the file containing the
+    only address authorized to connect (default = "only.txt" in
+    directory set by option -gd). Added option -bindir to specify
+    the directory where executables are installed (default = the
+    directory set by option -gd).
+
+GeneWeb Version 4.10
+--------------------
+
+* General
+  - [11 Aug 04] Some changes to make GeneWeb compilable by the new
+    ocaml, version 3.08.
+
+* GeneWeb server or CGI (gwd)
+  - [04 Oct 04] Accept now JPEG files with header "Exif".
+  - [30 Sep 04] Changed decline system and updfam.txt and updind.txt to
+    allow sentences like "insert child/children", particularly in languages
+    with accusative form, like Esperanto (the translation correct being
+    "enmeti idon/idojn", "n" being added to "ido" and to "idoj")
+  - [10 Aug 04] Automatic reordering of marriages from the weddings date
+    in personal pages of witnesses.
+  - [30 Jul 04] When using CGI mode, added a way to delegate authentifi-
+    cation to the http server (apache).
+  - [16 Jul 04] Added code to prepare a possible version allowing to
+    manipulate any kinds of DAGs, not only the ones where people have
+    only two parents, for genealogy of other kinds than humans and animals.
+  - [12 Jul 04] In families forms, added shortcut for created persons:
+    when the birth place starts with "b/", the date and place are set
+    to the baptism instead of birth. Added also "~year" as equivalent
+    to "/year/" to indicate "about date".
+  - [01 Jul 04] Changed all gif files into png.
+  - [22 Jun 04] Fixed slowness of "find_free_occ" if many many
+    names in the list.
+  - [16 Jun 04] Added "history of updates" in wizards notes.
+  - [24 May 04] Display the wizards notes by last modification, and a
+    link has been added for alphabetic order.
+  - [13 May 04] Added index files snames.inx, snames.dat, fnames.inx
+    and fnames.dat to improve memory use in requests displaying a surname
+    or a first name.
+  - [05 May 04] In URLs referencing somebody with his internal number
+    (i=...), added ";oc=n", n being his occurrence number (only if
+    wizard and n different from 0): useful for updates.
+  - [22 Mar 04] Fixed bug: surnames by alphabetic order failed when
+    surname starting with a space (case not expected).
+  - [03 Mar 04] Added new optional field in wizard and friend password
+    files. With an extra colon, gives user name, which is displayed by
+    default as ident in "forum add" and in wizard notes.
+  - [23 Feb 04] Submit in forum when wizard or friend is now in two
+    buttons, instead of "Ok".
+  - [16 Feb 04] Fixed bug: in ascend pages, the image link remained
+    even if cgl on.
+  - [12 Feb 04] Changed method output of "patches" file: instead of
+    1/ renaming "patches" into "patches~" 2/ writing "patches", which
+    can be dangerous (writing of "patches" file can fail in the middle
+    and therefore the database is no more accessible) or creating
+    temporary bad accesses ("Internal message: end of file"). Now it:
+    1/ writes the file "1patches" 2/ renames "patches" into "patches~"
+    3/ renames "1patches" into "patches". Why didn't I do it earlier?
+  - [24 Jan 04] Improved much memory usage on large databases by adding
+    an access file (name.acc) of the names index (name.inx). Built when
+    database created or after consang. Still work if name.acc does not
+    exist yet (in this case, no optimization, of course). Very sensitive
+    when searching somebody by name, first name or surname.
+  - [24 Jan 04] Improved speed on large databases and/or no memory
+    enough by removing some of the codes "let _ = base.data....array ()"
+    which where supposed to improve speed but using much memory (several
+    tenths of MB in my database 600K persons, instead of about 8MB without
+    this code).
+  - [05 Jan 04] Now, when database notes are modified, an intermediate
+    page is displayed with a link to the "notes" page, instead of the
+    "notes" page itself (to be consistent with other updates pages).
+  - [23 Dec 03] Nicer calendars page.
+  - [23 Dec 03] Optimization: suppressed no-loop-check for added or
+    modified marriages when it is not necessary (for big databases,
+    this check can take much time and memory).
+  - [23 Dec 03] Added "no mention" in marriage kinds (display only
+    "with ...", instead of "married with", "relationship with"...)
+  - [15 Dec 03] Added ability to add parameter ";title=..." in URL
+    to display a title for pages which have no titles.
+  - [07 Dec 03] French revolution year is now displayed in French as "an"
+    instead of "année".
+  - [22 Nov 03] Improved speed in relation by shortest path (computing
+    of "next" links were not optimized).
+  - [14 Nov 03] Improved speed of displaying by first name or by surname
+    when many changes have been done (file "patches" is big).
+  - [25 Sep 03] Added ability to put macros of start.txt in "motd"
+    (in general macros in variables defined by macro %V); useful for
+    example to put a "motd" for only wizards.
+  - [26 Aug 03] In the titles in display by surname, the surnames are
+    now displayed in alphabetic order.
+  - [17 Jul 03] Added URL variable "alwsurn": if "yes" the surnames
+    are always displayed in display by surname and in descendants
+    (same behaviour than the configuration variable "always_surname").
+  - [15 Jul 03] Changed the personal image URL: now displays an HTML
+    page with the image inside without width and height bounds (before,
+    the image URL displayed the image itself, but it does not work with
+    all browsers).
+  - [07 Jul 03] Changed "wrap=virtual" into "wrap=soft" in textareas.
+  - [31 May 03] Fixed little problem which can be dangerous: in case
+    of empty line in wizard (or friend) authorization file, everybody
+    is wizard (or friend).
+  - [01 Apr 03] Fixed bug for personal pages template: the macro
+    "%prefix_no_templ" had the bad side effect to make the possible
+    "templ=" removed in all the %prefix macros following it in the
+    template file (perso.txt).
+  - [06 Mar 03] Fixed bug: in the template perso.txt, the boolean value
+    child.has_children did not work correctly.
+  - [14 Feb 03] Changed the ability to send messages to wizards (see
+    the change of [24 Dec 01]). Now the message files must be in the
+    databases directory, sub-directory "etc", sub-sub-directory having
+    the name of the database. The file named "mess_wizard_user.txt"
+    is displayed to the wizard named "user" and the file named
+    "mess_wizard.txt" is displayed to all wizards.
+  - [06 Feb 03] Fixed bug: in displaying by slices, if the person's name
+    contained quotes (for example), the coding/decoding did not work
+    correctly and the button "OK" resulted in bad request.
+  - [30 Jan 03] Added option -min_disp_req
+
+* GeneWeb compiler (gwc)
+  - [05 Aug 04] Save memory in creating database by saving "persons"
+    data in files.
+
+* GeneWeb uncompiler (gwu)
+  - [04 May 04] Fixed small bug displaying in reverse order isolated
+    persons with relations, resulting no fixpoint when doing gwc/gwu.
+
+* Gedcom to GeneWeb (ged2gwb)
+  - [12 Feb 03] Fixed problem with places containing only spaces: now
+    replaced with empty strings.
+
+* Setup program (gwsetup)
+  - [08 Dec 03] Fixed problem of output files containing spaces.
+  - [17 Sep 03] Added interface for option -uin (code from Olivier
+    Pasteur).
+  - [07 Mar 03] Fixed bug: the -lang parameter of gwsetup did not work
+    when option -daemon was set.
+  - [12 Feb 03] Added double quotes around directories for information
+    lines.
+
+* GeneWeb databases Transfer Program (gwtp)
+  - [08 Dec 03] Added option -noup to forbid uploads.
+
+GeneWeb Version 4.09
+--------------------
+
+* GeneWeb server or CGI (gwd)
+  - [30 Dec 02] In history of updates, added in HTML comments the person's
+    first name/surname/number.
+  - [23 Dec 02] Now, gwd can definitively fail if errors Unix.EBADF or
+    Unix.ENOTSOCK on "accept", because they make the server loop with the
+    same error message. I don't know why it happens sometimes.
+  - [18 Dec 02] Save now a file named base_u.txt in the cnt directory,
+    recording the latest wizards updates.
+
+GeneWeb Version 4.08
+--------------------
+
+* Compilation
+  - [29 Nov 02] Added option -warn-error for compilation with ocamlc and
+    ocamlopt.
+
+* GeneWeb server or CGI (gwd)
+  - [09 Dec 02] Added code in some.ml in order that, in the display by
+    surname, the order is by birth date if "order=d" is added in the URL
+    (code by Ludovic Ledieu).
+  - [28 Nov 02] Fixed bug in displaying relationship by marriage: in
+    the text "are at the same time case1 case2" the "case2" where
+    sometimes false (problems of declinations, in particular).
+  - [22 Nov 02] Added ability to add inline translations in template
+    files (inline translations are parts of text starting with "["
+    immediately followed by a newline, explicit translations in
+    languages (one by line), and ending "]").
+  - [14 Nov 02] Fixed bug: in notes, the spaces were incorrectly stripped.
+  - [14 Nov 02] Changed links in forum so that the URL for "next message"
+    is the same as the URL in the forum main page. This way, it is
+    indicated as "visited" the same way.
+  - [13 Nov 02] Renamed some flags names (had old shortcut names).
+  - [08 Nov 02] Changed in Util.string_with_macros the filtering of
+    tags: now positive list (good_tags_list) instead of negative
+    list (dangerous_tags_list): this is better protection against present
+    and future HTML tags.
+  - [07 Nov 02] The option -images_url did not apply in pages from the
+    "DOC" link. Fixed.
+  - [26 Oct 02] Some cleanup in src/perso.ml, using more strings than
+    prints.
+  - [18 Oct 02] One space too many when displaying French Revolution
+    and Hebrew dates.
+  - [14 Oct 02] Fixed problem of displaying consanguinities: sometimes
+    displayed a lot of digits (too much precision).
+  - [04 Oct 02] When entering a complete name (first name + surname), if
+    the spelling does not match, display now an intermediate page ("specify")
+    even if there is only one matching person.
+  - [16 Sep 02] Fixed bug: the "renamed" variable did not work.
+  - [19 Aug 02] Fixed a declination problem in phrase (e.g. in German):
+       grand-parents of the spouse of s.o.
+    which was incorrectly translated:
+       Großeltern von der Ehemann von s.o
+    ("der" was displayed instead of "dem")
+
+* Base configuration files (base.gwf)
+  - [03 Oct 02] Fixed bug: when variable "always_surnames" is "yes", did
+    not however displayed the surname when several marriages.
+
+* Lexicon (lang/lexicon.txt)
+  - [18 Nov 02] Merged "%1 of %2" and "%1 of (same or...) %1" into one
+    only entry "%1 of %2"; the second case being separated with the first
+    one by a slash.
+  - [26 Sep 02] Added 2 phrases (months) in Russian (Eric Kvaalen).
+  - [25 Jul 02] Fixed and completed some phrases in Russian (Yuri Gavaga).
+
+* Gedcom to GeneWeb (ged2gwb)
+  - [22 Aug 02] Fixed bug with option -ls: when the surname held "ß" the
+    following character was converted into uppercase.
+
+* Setup program (gwsetup)
+  - [14 Nov 02] Added ability to more use the lexicon; added some
+    phrases; simplified some template files thanks to that.
+  - [03 Nov 02] Added macro "%Lxx;" replaced by the language whose id
+    is "xx" by its translation in the current language. Use it in template
+    files "gwd.htm" and "gwf_1.htm". Added in the gwsetup lexicon the
+    entry "!languages", the same than the one of the gwd lexicon.
+
+GeneWeb Version 4.07
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [17 May 02] In ancestor horizontally displaying, added a table with
+    nowrap.
+  - [13 Apr 02] Fixed problem of displaying "ancestors of xx", "descendants
+    of xx" and "cousins of xx" when "xx" is a name with declinations.
+  - [09 Apr 02] Does not index any more the "public name" when there is
+    no title. Added display of misc names in personal page if opt=misc
+    in the URL.
+  - [26 Mar 02] Does not fail any more if the file cnt/actlog is not
+    writable.
+  - [22 Mar 02] Fixed bug in the index of the descendants: they were no
+    more displayed by families.
+
+* Setup program (gwsetup)
+  - [20 Jun 02] Changed the macro prefix from "$" into "%", because of
+    a small problem: the CVS macro $Id was also interpreted (generated
+    a BAD MACRO text: not a problem since it was in comments, but...).
+  - [13 Apr 02] Added a "lexicon.txt" file, in order to be able to
+    accept different languages with characters encodings different
+    from iso-8859-1 and for future possible use of translations common
+    to several template files.
+
+* General
+  - [11 Mar 02] Big cleanup of the code, changing French named identifiers
+    into English.
+
+GeneWeb Version 4.06
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [08 Mar 02] Added option -trace_failed_passwd.
+  - [05 Mar 02] Changed implementation of the bug fix about the
+    "disconnection" when inserting children: removed the bufferization.
+    A simpler solution was just to shutdown "SEND" the socket, read
+    the possible answer, and then shutdown "RECEIVE". The change with
+    version 4.04 (two versions before) is then just the reading of the
+    browser answer: this was because it was not read that the browser
+    was unhappy.
+
+GeneWeb Version 4.05
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [24 Feb 02] Added <table><tr><td nowrap> in display by surname, to
+    avoid that the lines be folded. Replaced the <nobr> I had suppressed
+    some time ago because it was not standard.
+  - [26 Jan 02] The "calendars" page shows the time (of the server machine).
+  - [20 Jan 02] Use of dates order (according to the language) in calendars
+    page.
+
+* Gedcom to GeneWeb (ged2gwb)
+  - [26 Feb 02] Some changes in witnesses (did not work any more), added
+    the ability to be witness several times, fixed problems of dates
+    written as text in titles.
+  - [26 Feb 02] Fixed bug: did not import date FROM BET 1487 AND 1488.
+    I am not sure it is correct gedcom but it can happen in title date
+    range.
+
+* GeneWeb to Gedcom (gwb2ged) and Gedcom to GeneWeb (ged2gwb)
+  - [20 Jan 02] Fixed bug when converting from and to ansel encoding:
+    the German character es-tsett needed to be converted.
+
+* GeneWeb compiler (gwc) and Gedcom to GeneWeb (ged2gwb)
+  - [10 Jan 02] Warranty that the index (istr) number of the empty string
+    is 0 and of the string "?" is 1.
+
+* GeneWeb databases Transfer Program (gwtp)
+  - [30 Jan 02] Grouped the two languages en and fr in common templates.
+
+* Setup program (gwsetup)
+  - [04 Feb 02] When extracting a file (source or gedcom), take now the
+    base name (the possible directory part is removed).
+
+* All executables
+  - [10 Jan 02] No more statically linked by default.
+
+* Template files
+  - [20 Jan 02] Fixed bug in perso.txt: has_image worked only for the
+    current person.
+
+GeneWeb Version 4.04
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [31 Dec 01] Fixed bug: [*(month)]10 did not work in templates, because
+    only one character was scanned.
+  - [24 Dec 01] Added ability to create a file named "base_user_mess.txt"
+    where base is the data base name, user a wizard name: in this case
+    the connected wizard receive the contents of this file at each page
+    which he receives.
+  - [20 Dec 01] Added "align=left" to all "<tr>" tags because some
+    browsers display them centered by default.
+  - [10 Dec 01] In configuration file (base.gwf), if the variable
+    "expand_env" is set to "yes" ("no" by default), the system
+    environment variables are expanded in the values of the customized
+    variables (whose name start with "var_"). The syntax for environment
+    variables si ${xxx} where xxx is the environment variable. See the
+    example configuration file a.gwf of the distribution.
+  - [17 Dec 01] Added request variables "by=", "bm=" and "bd=" in displaying
+    of the latest birthdays and death days to specify resp. a year, a month
+    and a day before.
+  - [05 Dec 01] Fixed bug: when merging a person with family with a
+    person with neuter sex, failed (assertion error).
+  - [27 Sep 01] Added "%image_txt;" as variable in perso.txt. Return the
+    person key used as default image name.
+  - [19 Sep 01] Shorter names for variables in update family form, in order
+    to have a shorter communication length and perhaps that it works better
+    with internet explorer.
+  - [19 Sep 01] Trace: too big texts in referer now cut.
+
+* Gedcom to GeneWeb (ged2gwb)
+  - [05 Dec 01] Deletion of heading and trailing spaces in some fields. It
+    resulted fields (occupation, sources) having just a space and gwu exported
+    bad results.
+
+* GeneWeb databases Transfer Program (gwtp)
+  - [05 Oct 01] Added other acceptable tags in trl files: ul, ol, li, table,
+    tr, td.
+
+* Compilation
+  - [07 Sep 01] All executables are now compiled static (no dynamic library)
+
+* Everywhere
+  - [27 Nov 01] Changed all "data base" into "database". I am too bad in
+    English... :-)
+
+GeneWeb Version 4.03
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [06 Aug 01] Removed <nobr></nobr> in descendants display.
+  - [13 Jul 01] In auth files, added ability to add a ':' after the password
+    followed by a comment.
+  - [11 Jul 01] Added trace of latest connected friends base_f.txt if there
+    is a friend password file. (already exist for wizards)
+
+* Lexicon (lang/lexicon.txt)
+  - [14 Jul 01] Added phrase "undefined sex for %t".
+
+* GeneWeb databases Transfer Program (gwtp)
+  - [13 Jul 01] Added "wizard_just_friend" which is now configurable under
+    gwtp.
+
+GeneWeb Version 4.02
+--------------------
+
+* General
+  - [12 May 01] Added a directory "contrib".
+
+* Compilation
+  - [17 Apr 01] Added tools/pa_newseq.ml because the Camlp4 revised syntax
+    has changed for sequences. Allow to compile with both old and new versions
+    of Camlp4.
+
+* GeneWeb daemon/CGI (gwd)
+  - [17 Jun 01] Fixed problem in display by places/surnames when surnames
+    have declinations: were displayed with their declinations instead of
+    the nominative form.
+  - [03 Jun 01] Fixed inverted alphabetic order of first name for index
+    of descendants and spouses.
+  - [01 Jun 01] Changed displaying in forum: the header are displayed by
+    groups of two months, in order that the changes of the tables sizes
+    in a new month be invisible.
+  - [12 May 01] In request names by alphabetic order (short display), added
+    ability to add ";atleast=xx" where xx is a number, to display only names
+    having at least xx individuals.
+  - [03 May 01] Rewrote some parts of name.ml in a cleaner and surer way.
+  - [21 Apr 01] Added small test in relation.ml in case of request with
+    bad fef parameter to avoid request failure.
+  - [21 Apr 01] Changed robot traces (sorted by number of requests).
+  - [15 Apr 01] In case of overflow while counting relationships, now display
+    *** (instead of the number which overflowed).
+  - [08 Apr 01] In forum headers displaying, put one table for each date,
+    in order that we don't have to wait the end of the table to see the
+    first messages
+
+* Lexicon (lang/lexicon.txt)
+  - [25 Apr 01] Deleted some not so important phrases used only in
+    anniversaries of dead people: "of the birth" (using "birth") and
+    "of the death", "of the murder", "of the execution", "of the
+    disappearance" (using "death").
+
+* Setup program (gwsetup)
+  - [09 Apr 01] Changed word "configurate" (which does not exist!) into
+    "configure".
+  - [08 Apr 01] fr/gw2gd.htm: fixed errored message
+
+GeneWeb Version 4.01
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [01 Apr 01] The URL to access GeneWeb images does not contains the "?"
+    character any more (in this case, all browser will put hopefully put
+    them in their cache).
+  - [23 Mar 01] The log count is now displayed in the traces before the
+    traitment.
+  - [20 Mar 01] Added + as possible character in an URL.
+  - [15 Mar 01] Added file "alias_lg" in lang directory to specify aliases
+    for languages.
+
+GeneWeb Version 4.00
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [10 Mar 01] When sending an image with wrong content type, display
+    that content type in an error page.
+  - [20 Feb 01] Added option '-images_dir': works like '-images_url' but
+    the parameter is a directory (absolute or relative to the -hd directory),
+    where the images are supposed to be. This has been added to be able to
+    add file:// accesses to images in Windows version.
+  - [14 Feb 01] Fixed problem in lexicon: declinations were missing, e.g.
+    combinations "merge persons" or "switch families" did not work in
+    Esperanto.
+  - [13 Feb 01] If "propose_add_family" is "no" in config file, forbid
+    to add families not connected to the rest (i.e. "ok" on "add family"
+    form when everybody is "create").
+  - [12 Feb 01] In list of all persons sharing same title, the "tree" link
+    is proposed also for browser without tables.
+  - [07 Feb 01] Fixed problem in dag2html. Had to add functions
+    (shorten_too_long and bottom_adjust) to shorten too long branches
+    which may appear in the algorithm.
+
+* Lexicon (lang/lexicon.txt)
+  - [01 Mar 01] The existing trailing spaces at end of lines are deleted.
+    Now gwd and the other utilities accept the line "xx:" without trailing
+    space as an empty translation.
+
+* GeneWeb compiler (gwc)
+  - [14 Feb 01] Delete empty titles (titles with empty identifier)
+
+* Template files
+  - [16 Feb 01] Changed "%origin_file;": displays just the origin file (if
+    wizard). The test "opt=from" is now done in perso.txt by eval_opt = "from"
+    (new syntax).
+
+GeneWeb Version 3.11
+--------------------
+
+* Images
+  - [03 Feb 01] Installed a much smaller GeneWeb logo.
+
+* GeneWeb daemon/CGI (gwd)
+  - [31 Jan 01] Changed default mac_anc_tree to 7 (instead of 5)
+  - [20 Jan 01] Added request "m=KILL_ANC" to kill someone's ancestors.
+    Allowed only if variable "can_kill_ancestors" is set to "yes" in the
+    configuration file. Not documented because need interface with buttons,
+    links, intermediate pages to ask for confirmation, things like that.
+  - [30 Dec 00] When option redirected used, the traces now display the
+    referer.
+  - [27 Dec 00] Fixed problem: age at death were sometimes not displayed when
+    it should have to be.
+  - [19 Dec 00] Fixed several problems of declinations appearing in esperanto
+    version (e.g. texts "parents", "notes").
+
+* Lexicon (lang/lexicon.txt)
+  - [21 Jan 01] Changed phrase "up to" to accept ask for declination. Changed
+    the translation in Czech (Hanus Adler) to indicate the good declination
+    after it.
+
+* Setup program (gwsetup)
+  - [30 Dec 00] Fixed information file about how to put a background image,
+    the URL to use and the directory were wrong (obsolete).
+
+* GeneWeb databases Transfer Program (gwtp)
+  - [05 Feb 01] Added a trace in case of error. So far, there were no
+    traces, it just stopped.
+
+GeneWeb Version 3.10
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [28 Nov 00] Fixed problem in relationship displaying in German; sometimes
+    displayed "ein:d:+em" in the text.
+  - [26 Nov 00] In merging persons the default selected number is now 1/ the
+    lowest if the first names are the same or 2/ the first one if the first
+    names are different.
+  - [18 Nov 00] Changed inference of origin file: trying to link to father
+    or mother's other marriages first.
+  - [10 Nov 00] Fixed bug in titles tree: when the same person appeared
+    several times in the title list, the title tree showed his last order
+    number instead of his (more logicial) first order number. 
+
+* Installation by Linux rpm
+  - [07..09 Nov 00] Many improvements. See geneweb.spec changelog
+
+GeneWeb Version 3.09
+--------------------
+
+* General
+  - [29 Oct 00] Added useful function list_iter_first. Deleted functions
+    applied to list to accept old versions of OCaml: now, it is necessary
+    to compile with at least version 3.00.
+  - [12 Oct 00] Changed all "nick_name" into "qualifier" in all source files.
+
+* GeneWeb daemon/CGI (gwd)
+  - [31 Oct 00] Created the request "m=RLM" followed by the list of persons
+    to link two by two to create arbitrary dags (i1=...;i2=...;i3=... and so
+    on). Besides, the new code for initializing dags seems to be less bugged,
+    giving better results for example in relationships by shortest path.
+  - [30 Oct 00] In relation.ml changed the part computing the relationship
+    by shortest path to get a function returning the result instead of
+    displaying it and raising a "Found" exception.
+
+* GeneWeb uncompiler (gwu)
+  - [02 Nov 00] Filter tabulations.
+
+* Consanguinity computing (consang)
+  - [28 Oct 00] Put constants in progress bar (option -q) to have a more
+    readable code.
+
+GeneWeb Version 3.08
+--------------------
+
+* Makefile
+  - [29 Aug 00] Added variable DESTDIR to represent the distribution directory
+    (request from Debian packagers).
+
+* GeneWeb daemon/CGI (gwd)
+  - [22 Sep 00] Fixed gwd traces in case of cgi access with user:passwd;
+    now display the user name in traces, not just the fact he is wizard
+    or friend.
+  - [14 Sep 00] Replaced srcfile.ml macros %d and %t by %s followed by the
+    configuration variable and semicolon: resp. %spropose_add_family; and
+    %spropose_titles;. Same change in start.txt files.
+  - [13 Sep 00] For etc files (e.g. personal index.txt), added macros: %+
+    to increment a counter and %# to display it.
+  - [12 Sep 00] In traces suspension points for long requests are applied
+    in the middle instead of at end.
+  - [25 Aug 00] Fixed option -redirect: did not apply to all requests
+  - [22 Aug 00] Added test: no more display "age at death" if negative
+    (because of erroneous dates).
+
+* Gedcom to GeneWeb (ged2gwb)
+  - [23 Sep 00] Fixed bug: if GIVN = first name, should have ignored it,
+    but did not.
+
+* GeneWeb databases Transfer Program (gwtp)
+  - [06 Sep 00] Added ability to change the default language.
+  - [22 Aug 00] Fixed bug: worked only if the CGI name was gwtp (could not
+    be gwtp.cgi, for example). Fixed also the distribution: template files
+    used by gwtp (3 files ending with .txt) were not installed. Fixed also
+    a problem: when downloading a file, the proposed name for the file was
+    not the good one (a trick was used but worked only with Netscape, not
+    IE); changed the same thing for images in gwd.
+
+GeneWeb Version 3.07
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [12 Aug 00] For relationlinks by shortest path, if "cancel GeneWeb
+    links" is selected, now it is applied to all pages browsed by ">>".
+  - [12 Aug 00] Added also check baptism date to determine public and
+    private.
+  - [08 Aug 00] In first names by alphabetic order for a given surname,
+    use now (the translation of) "%1 of %2" instead of "of".
+  - [26 Jul 00] Fixed detail in Wserver: closed socket before callback
+    in order to allow the callback to fork processes without being blocked    
+  - [25 Jul 00] Restructured Wserver to be cleaner and to save memory
+    when sending big files.
+  - [19 Jul 00] Message "Ready" of gwd display now date as yyyy-mm-dd.
+  - [12 Jul 00] Refreshes with possible good address when bad character in
+    base name (e.g. http://host.com/foo/ instead of http://host.com/foo?)
+  - [12 Jul 00] "Server" answer separate "GeneWeb" and version number with
+    a slash.
+
+GeneWeb Version 3.06
+--------------------
+
+* Setup program (gwsetup)
+  - [28 Jun 00] Take only the 1st two characters of the language given.
+
+* GeneWeb daemon/CGI (gwd)
+  - [12 Jul 00] Added "GeneWeb" and version in server answer.
+  - [11 Jul 00] The first nobility title in personal page is no more
+    capitalized.
+  - [23 Jun 00] Added the macro %u in trailer files (base.trl) which is
+    expanded as the current URL.
+  - [22 Jun 00] Added, in the system of translation in welcome page with [],
+    the ability to put an entry holding %d, with parameter after the []
+    between parentheses. Allows to have one common version of the paragraph
+    "anniversaries" (and co).
+  - [17 Jun 00] Suppressed traces of rejected robots failing on password
+    accesses.
+
+* Welcome pages (*/start.txt)
+  - [12 Jul 00] Completed Esperanto version
+  - [21 Jun 00] The texts after "You can also consult" are now the same
+    for all the welcome pages and translated from the lexicon.
+
+GeneWeb Version 3.05
+--------------------
+
+* General
+  - [08 Jun 00] Strip executables.
+  - [07 May 00] The files CHANGES and LICENSE now end with .txt.
+
+* Gwsetup program
+  - [06 Jun 00] Hacked to fix a problem in clean up: the file cleanup_err.htm
+    is missing in all languages! Used "bsi_err.htm" instead.
+
+* GeneWeb daemon/CGI (gwd)
+  - [04 Jun 00] Check about titles dates no more done against the death date,
+    since titles can be given after death.
+  - [19 May 00] Added a small + in display ancestors horizontally. Seems
+    more pretty :-)
+  - [17 May 00] Fixed problem of the request "robots.txt": the lines ends
+    were "ctrl-o ctrl-j" instead of "ctrl-m ctrl-j (\r\n).
+  - [14 May 00] Does not fail any more ("document contains no data") when
+    the "cnt" directory has no access permissions.
+  - [10 May 00] Changed traces when wizards, friends, global accesses.
+  - [10 May 00] Reply now "no access" for attempt of access to database
+    in CGI mode when base auth file defined (because that works only in
+    server mode).
+  - [04 May 00] Dates "or year" and "year interval" are shortly displayed
+    now as "ca y1/y2" instead of just "ca y1".
+
+* GeneWeb uncompiler (gwu)
+  - [16 May 00] Added options -sep and -sep_limit to be able to separate
+    families in different files.
+
+* GeneWeb daemon/CGI (gwd) and uncompiler (gwu)
+  - [03 May 00] Delete possible trailing space or newline at end of sources
+    (code missing in some places).
+
+* Gedcom to GeneWeb (ged2gwb)
+  - [09 May 00] Added notes CONC when sons (e.g. 2 CONC following 1 CONC).
+
+GeneWeb Version 3.04
+--------------------
+
+* General
+  - [12 Apr 00] Cleaned up the code to provide a version without process
+    nor threads (ifdef NO_PROCESS). Can prepare a possible Macintosh
+    version.
+
+* GeneWeb daemon/CGI (gwd) and welcome files (lang/*/start.txt)
+  - [23 Apr 00] Added macro %m = value of "latest_event" of base.gwf and
+    put links "m=LB;k=%m" "m=LD;k=%m" "m=LM;k=%m" in welcome pages, so
+    showing the default value and indicating (to smart people) the way to
+    change it in the URL.
+
+* GeneWeb compiler (gwc)
+  - [28 Apr 00] Cut possible trailing spaces in some input fields
+
+* GeneWeb uncompiler (gwu)
+  - [02 Apr 00] Fixed problem in gwu: families could be written several
+    times if phony spouses with several marriages.
+
+* GeneWeb compiler (gwc) and uncompiler (gwu)
+  - [02 Apr 00] Added some missing "quote_escaped" in UpdateInd.ml (bug
+    about quotes)
+  - [30 Mar 00] In latest births, skip a line after future births if any.
+  - [23 Mar 00] Generates "csrc" if at least two children have the same
+    #src value (save file length). Added "cbp", idem for the birth place
+    (#bp value).
+
+* Gedcom to GeneWeb (ged2gwb)
+  - [10 Apr 00] Applies now "-fne" before "-efn".
+
+GeneWeb Version 3.03
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [20 Mar 00] Generates "pz,nz,ocz" instead of "iz" (Sosa reference) when
+    access_by_key.
+  - [16 Mar 00] Added "zur" as particle.
+  - [16 Mar 00] Improved the inferring of origin_file field when updating
+    a family. Now searches also among other marriages.
+  - [05 Mar 00] Changed images request, because it was possible to display
+    the images even for private persons ("friend" security hole).
+    Consequently, there are now two forms of the "m=IM" requests: one for
+    persons (images accessed in directory "bd/images/base"), one for
+    other images (images accessed in directory "bd/images" or "hd/images").
+    Other consequence: background images must *not* be put in bd/images/base
+    directory.
+  - [05 Mar 00] In m=RL, added ability to add ";tab=on" or ";tab=off" to
+    force printing with or without tables.
+  - [23 Feb 00] Fixed bug: in notes, when "<a" and "href" were separated
+    by a newline instead of space, it was not considered to be in the
+    tag "a href" and if followed by "http://" could erroneously generate a
+    link.
+  - [21 Feb 00] Add a + for dead people without date, even if their
+    birth date clearly shows that they must be dead.
+  - [09 Feb 00] Added link to welcome in anniversaries pages.
+  - [02 Feb 00] Fixed little problem in anniversaries: when other
+    calendars than Gregorian (e.g. Julian), could select "anniversary"
+    even for persons having only the year in their date (fixed by testing
+    the field "delta" in the date record).
+  - [01 Feb 00] Added indentation in forum to make it more readable.
+  - [25 Jan 00] Display the number of persons in some more pages. Don't
+    display it when number <= 1.
+  - [25 Jan 00] Changed the limit for public persons to 150 years instead
+    of 100 years: persons must have been born and dead before 150 years
+    to be public.
+  - [21 Jan 00] When searching for somebody, if several persons have
+    this name, display name of spouses for men also.
+  - [20 Jan 00] Fixed omission in 'advanced.txt': I forgot to change
+    the [not dead] into [alive].
+  - [19 Jan 00] In traces, display dates in standard, i.e. using -
+    instead of / in year-month-day.
+
+  - [22 Mar 00] Fixed bug: if interruption (break, control C) between
+    the display of "*** ok" and the end, the base is lost without save.
+  - [22 Mar 00] In option "-q" display a rotating wheel.
+
+* GeneWeb uncompiler (gwu)
+  - [19 Mar 00] Convert newlines into spaces for fields supposed not to
+    contain newlines (e.g. sources).
+  - [27 Feb 00] Deleted backward compatibility giving "main title" according
+    to the title name.
+
+* Gedcom to GeneWeb (ged2gwb)
+  - [19 Feb 00] The option "-ds" applies now to families too.
+
+* GeneWeb to Gedcom (ged2gwb)
+  - [22 Mar 00] Now faster, by preloading "unions" and "descends".
+
+* Lexicon (lang/lexicon.txt) and welcome pages (lang/*/start.txt)
+  - [21 Jan 00] Changed "anniversaries of dead" into "annivesaries of death"
+  - [13 Jan 00] Changed "living" into "alive"
+
+GeneWeb Version 3.02
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [Jan 15, 00] Big acceleration of some dags displays by setting a
+    smaller threshold (10 instead of 15) in relationLink.ml
+  - [Jan 14, 00] No more hypertext link for spouses and all relations in
+    relationlink computing page.
+  - [Jan 11, 00] Put a separation (<td>&nbsp;</td>) between the two branches
+    in simple relationship displaying.
+  - [Jan 9, 00] Centered title "genealogical database".
+  - [Jan 9, 00] Added the ability to add ";td=bgcolor=xxx" in URL when
+    printing a dag. Color the square of the person.
+  - [Jan 5, 00] Added the ability to add ";bd=n" (n >= 1) in URL when
+    printing a dag. Put a square around each person of the tree.
+  - [Dec 14, 99] No more compatibility with old relationship request form e=...
+  - [Dec 14, 99] Changed things so that adding ";em=R;ep=fn;en=sn" in
+    the URL generates relationship computing with "fn sn" in welcome page
+    and in notes (already worked for many other page kinds).
+
+* Lexicon
+  - [Jan 14, 00] Deleted entry "his wife/her husband": use now "husband/wife"
+    in all cases.
+
+GeneWeb Version 3.01
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [Dec 2, 99] Added a system of "areas" in databases protected by
+    a password, based on the name of the ".gw" files => works only
+    for databases created with "gwc".
+  - [Nov 23, 99] Fixed problem of selecting a first name: sometimes it
+    did not work. Used "Name.lower" instead of "Name.strip_lower" for the
+    list for a future selection.
+  - [Nov 19, 99] Fixed bug: redirected service and renamed service messages
+    did not work in cgi mode
+  - [Nov 13, 99] Added some checks of access tables out of bounds
+  - [Nov 13, 99] Added link to welcome page in case of not found
+  - [Nov 9, 99] Chop suffix ".gwb" if the base name has it in URL
+  - [Nov 6, 99] The URL for the "up" image now independent from the database
+  - [Nov 5, 99] Red display title for not found persons.
+  - [Nov 5, 99] Lengthened the height of the database notes area.
+
+* GeneWeb compiler (gwc) and uncompiler (gwu) 
+  - [Nov 9, 99] Fixed problem for titles holding the character colon. The
+    gwc raised syntax error.
+
+* Gedcom to GeneWeb (ged2gwb)
+  - [Nov 8, 99] Fixed little problem with TITL field: could sometimes create
+    bad titles names without label an place for gedcoms not coming from
+    GeneWeb
+
+* Lexicon
+  - [Nov 23, 99] Added entry "maximum". Deleted entry "max %d generations".
+    Changed entry "generation" into "generation/generations".
+
+GeneWeb Version 3.00
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [Nov 1, 99] Print relations only for friends and wizards.
+  - [Oct 31, 99] Added macro %k for images in order to have the same request
+    for any database in any language. And several changes to make the DOC
+    request independent from the database.
+  - [Oct 25, 99] Modified the treatment of nth (overflowing after 100)
+    to display the number itself (better than just "n-th").
+  - [Oct 25, 99] Commented the loading of the whole persons and families
+    arrays in "descend.ml": supposed to make things go faster but consumming
+    13M in my database when clicking on "descendants" for anybody.
+  - [Oct 15, 99] Added a check of month day in gregorian dates.
+  - [Oct 9, 99] Added a "suicide" request: if exists in the request,
+    the sender go the the robot black list... by setting a hidden URL with
+    that in pages, I can detect them... ha ha ha.
+  - [Oct 9, 99] Fixed bug in "family.ml": for the page "specify" the
+    normal chronological order sometimes did not work correctly.
+  - [Oct 6, 99] When displaying ascend tree in Lynx, changed disposition
+    so that it is displayed in decreasing order of Sosa number.
+
+* Consanguinity computing (consang)
+  - [Oct 6, 99] Improved it to save memory.
+
+GeneWeb Version 2.07
+--------------------
+
+* Gwsetup program
+  - [Sep 25, 99] While saving a ".gwf" file, add the variables not treated
+    in the form, but present in the file.
+
+* GeneWeb daemon/CGI (gwd)
+  - [Sep 30, 99] When modifying a person, does not keep the notes when
+    his first name or surname hold a "?" since it cannot not saved in
+    GeneWeb source files.
+  - [Sep 29, 99] Errorred when clicking on surnames by alphabetic order
+    on empty databases. Fixed.
+  - [Sep 28, 99] Forgot sharp (#) as possible character in URLs. Fixed.
+  - [Sep 26, 99] Fixed bug of ordering persons by dates in "specify" page.
+
+GeneWeb Version 2.06
+--------------------
+
+* General
+  - [Aug 31, 99] Changed internal representation of databases to add
+    "notes origin file" and "sources" for global notes.
+  - [Aug 16, 99] Now "make" does "make opt". To run the older "make"
+    do "make out". The installation tells to run "make" (i.e. "make opt").
+    The previous installation version told to run "make" and "make opt"
+    but it is useless to run both.
+
+* Setup program and GeneWeb daemon
+  - [Aug 16, 99] In distribution (make distrib), creates "setup" and "gwd"
+    as shell script wrappers under Unix and .bat files wrappers under Windows.
+    Added the executable "setup" in "gw" directory as name "gwsetup".
+
+* GeneWeb daemon/CGI (gwd)
+  - [Aug 30, 99] To make the new option "-no_pit" of ged2gwb, had to change
+    the policy of private/public/iftitles.
+  - [Aug 21, 99] Added request mode "TREE" to display general tree; no
+    interface for it for the moment...
+  - [Aug 17, 99] If option "-auth" used, print the password area like in
+    cgi mode (i.e. an input area instead of hypertexts triggering a window
+    for password), because the auth password and the wizard/friend password
+    are contradictory.
+  - [Aug 17, 99] In display by first name or surname, when several spellings
+    are found, display them in decreasing frequency order.
+  - [Aug 14, 99] In srcfile.ml, for start.txt files, added "o" macro
+    (print if notes) and ability to decline verb + noun ([verb][noun]
+    without space between 1st ] and snd [).
+  - [Aug 8, 99] Improved -robot_xcl option (to exclude impolite robots).
+  - [Aug 7, 99] Fixed bad behavior: in welcome pages, proposed "wizard" to
+    to wizards when the flag "wizard_just_friend" was set.
+
+* GeneWeb to Gedcom (gwb2ged)
+  - [Aug 31, 99] For adoptive parents, does not generate a CHIL field any
+    more in adoptive parents family.
+
+GeneWeb Version 2.05
+--------------------
+
+* General
+  - [Jul 22, 99] Added functions p_first_name and p_surname to prepare
+    installation of declined forms for names. Hope it works one day (not
+    sure...)
+  - [Jul 15, 99] Changed internal reprentation of strings in databases:
+    no more use of ansel encoding, returning back to version 1.06. Should
+    not change anything to normal users. This was done because of too
+    many drawbacks (many displaying bugs, code more complicated) against
+    too few advantages (displaying supposed to be correct when mixing
+    various encodings). Anyway, code is smaller.
+
+* GeneWeb daemon/CGI (gwd)
+  - [Aug 6, 99] Dates in traces are now yyyy/mm/dd instead of dd/mm/yyyy
+  - [Aug 5, 99] Restored the system of robot exclusion (had been deleted
+    in version 1.10).
+  - [Aug 3, 99] Increased speed of clicking on "ancestors" by pre-loading the
+    arrays "ascends" and "couples". [Aug 5, 99] Idem with "descendants" by
+    pre-loading "persons" and "families".
+  - [Aug 3, 99] In ancestors and descendants pages moved the "Ok" near the
+    selection popup menu.
+  - [Jul 28, 99] In update family forms, shortened the names of the variables
+    "first_name" and "surname" into "fn" and "sn".
+  - [Jul 23, 99] Check translated formats (phrases holding %'s) displaying
+    the initial format if failed (instead of scratching).
+  - [Jul 9, 99] Changed request syntax for cousins: "v1=#" instead of "v=#"
+    and ability to ask for "v1=#;v2=#" for uncles and nephews...
+  - [Jul 2..Aug 2, 99] Added "access_by_key" in "base.gwf" files to generate
+    accesses by keys instead of index in the person array (which can change
+    when recompiling the base), allowing to update the database without
+    disturbing the users accessing it.
+
+* GeneWeb compiler (gwc)
+  - [Jul 20, 99] Translated into English some variables and functions whose
+    names where in French or in mixed French-English.
+
+GeneWeb Version 2.04
+--------------------
+
+* Installation
+  - [Jun 30, 99] Added "README.txt" (English) and "ALIRE.txt" (French) in
+    distribution just to say that you have to launch the program "setup".
+
+GeneWeb Version 2.03
+--------------------
+
+* New
+  - [May 30, 99] Added program "fpla": first parentless ancestors. Given
+    a database, displays the Sosa number of the first ancestor without
+    parent. Sorted by Sosa numbers: the first displayed person is therefore
+    the person whose ancestors list is the most complete.
+
+* Setup program
+  - [May 12, 99] Added "charset=iso-8859-1" in headers (undefined, before).
+  - [May 11, 99] Give up the second command of base recovery when the first
+    one returns an error code.
+
+* GeneWeb daemon/CGI (gwd)
+  - [Jun 2, 99] Deleted the "&nbsp;" added between "on" (or any preposition
+    before a date) and a date. Reasons: 1/ it was not absolutely necessary,
+    2/ there was a problem with the empty Swedish translation of "on (year)"
+    the translation of "dead on 1953" was "död &nbsp;1953" resulting on the
+    displaying of two spaces.
+  - [May 23, 99] Deleted supposed useless code, particularly in MergeIndOk,
+    to make code cleaner, hopefully not introducing bugs.
+  - [May 23, 99] Added renitialization of field "consang" when modifying
+    families to prepare new version of program "consang" (minimalist).
+  - [May 18, 99] Added thousand separator for displaying of number of persons
+    in the welcome page.
+
+* GeneWeb uncompiler (gwu)
+  - [May 28, 99] Fixed missing newlines when the initial sources came from
+    several files and the option -odir was not used.
+
+* Compilation
+  - [May 23, 99] Separated consang computation in another file "consangAll.ml".
+  - [May 12,99] Fixed YAAP (yet another accent problem...)
+  - [May 8, 99] Added "make opt" case in "setup" to build optimized versions.
+
+GeneWeb Version 2.02
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [May 4, 99] If default_lang of some base (file "base.gwf") is empty
+    set it to default_lang of command "gwd" (was set before only when
+    default_lang was not defined). Changed for the "setup" program.
+  - [May 2, 99] Fixed small uncomfortable feature: when a new couple was
+    added with new (created) persons, then modified to add existing
+    children, the field "origin_file" was not updated for the family.
+    The result is when using "gwu -odir" this new family was displayed
+    on standard output instead of saved in the origin file of a child.
+  - [May 1, 99] Fixed behavior in updating persons form for burial.
+  - [Apr 28, 99] Fixed fragile part of code that reads the lexicon. Raised
+    'Invalid_argument "String.sub"' if the lexicon held lines interpreted
+    as keys but of string length < 4. The lexicon should not, but if it
+    is corrupted for some reason, this was not a good error message!
+  - [Apr 28, 99] Added the ability to add a file named "refuse.txt" to
+    explain reasons of gwd exclusion.
+  - [Apr 24, 99] Don't print "+" in short dates for died person if there is
+    no death date and if the person is older than 120 years, as it was
+    done in 2.01 for long dates displaying.
+
+* GeneWeb compiler (gwc)
+  GeneWeb uncompiler (gwu)
+  Consanguinity computing (consang)
+  GeneWeb to Gedcom (gwb2ged)
+  - [May 2, 99] Changed return code in case of errors found. Now 2. Error
+    messages on stdout instead of stderr. Had to be changed for the new
+    "setup" program.
+
+GeneWeb Version 2.01
+--------------------
+
+* General
+  - [Mar 31..Apr 5, 99] Changed some types, labels, constructors, functions
+    names, cleaned up some code.
+
+* GeneWeb daemon/CGI (gwd)
+  - [Apr 20, 99] Changed title text "nth generation" into "Generation n"
+    because of necessity in Swedish to add another translation.
+  - [Apr 19, 99] Added "value=on" in checkboxes generated HTML code. Seemed
+    to be the default in several browsers (Netscape, IE, Lynx) but not all of
+    them (Kfm).
+  - [Apr 15, 99] Changed link of "gwd.opt", separating the objects in two
+    parts, using cmxa files, because Windows 98 (or maybe Cygnus) does not
+    work with this too long line, I don't know why. No difference in Unix.
+  - [Apr 6, 99] Big cleanup about titles (hopefully not introducing bugs).
+  - [Apr 3, 99] Don't print "died" in personal page if this is the only
+    information (no date, no place) and if it is older than 120 years.
+  - [Mar 22, 99] Ability to put "*" (to match any characters) in lines in
+    exclude file.
+  - [Mar 20, 99] When merging families, does not print any more the
+    intermediate page when there is no differences to select.
+  - [Mar 16, 99] Deleted display of trailing space in some links like in
+    "Modify" in page "update" for example.
+  - [Mar 14, 99] Cleaned up some generated HTML code.
+  - [Mar 10, 99] Inlined "List.remove_assoc" in order to be compilable
+    by OCaml and Camlp4 2.01 as well.
+
+* Welcome pages (hd/lang/xx/start.txt)
+  - [Mar 20, 99] Changed order of links for displayed anniversaries and
+    latest births and deaths.
+
+* Lexicon (hd/lang/lexicon.txt)
+  - [Mar 22, 99] Changed "allied%t (euphemism for married or... not) to"
+    into "allied%d to". Changed French translation "allie" into "marie".
+
+* Wserver (../wserver/wserver.ml)
+  - [Mar 22, 99] Completed "special" list of characters that must be
+    encoded (according to Jean-Christophe Filliatre).
+
+GeneWeb Version 2.00
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [Mar 8, 99] Fixed bug for excluded addresses in cgi mode.
+  - [Mar 4, 99] Deleted all "open Unix" and use of "Unix." for all unix
+    function. Deleted "Pervasives.".
+  - [Feb 27, 99] No more newline before the ending dot of the titles
+    displaying in personal pages.
+  - [Feb 18. 99] Added (undocumented) feature: adding ";opt=spouse" to an
+    URL of relationship link (m=RL), the spouses are displayed.
+
+* Doc
+  - [Feb 23, 99] Correct HTML for creation of LICENSE.htm in directory doc.
+
+GeneWeb Version 1.11
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [Jan 29, 99] Print clear messages when missing files (lexicon.txt, etc.)
+  - [Jan 12, 99] Changed test in input_lexicon (gwd.ml): length of line < 4
+    instead of line = "": better test to avoid failures when bad lexicon
+    files.
+
+* Gedcom to GeneWeb (ged2gwb)
+  - [Jan 16, 99] Ignore abnormal errors (displaying "uncaught exception:
+    Stream.Failure").
+
+* GeneWeb compiler (gwc)
+  - [Jan 23, 99] Forgot to skip tabulations while reading lines in ".gw" files
+  - [Jan 12, 99] Failure error now displayed in stdout instead of stderr.
+
+* Most descendants computation (mostdesc)
+  - [Jan 25, 99] Fixed little problem of alphabetic order.
+  - [Jan 16, 99] Added mostdesc.opt in Makefile.
+
+GeneWeb Version 1.10
+--------------------
+
+* GeneWeb daemon/CGI (gwd)
+  - [06/01/99] Added %y and %z as macros in srcfile.ml
+  - [16/12/98] Translated some program record fields and constructors in
+    english.
+  - [16/12/98] Separated "base" into "base_data" and "base_func" to prepare
+    code cleanup.
+  - [15/12/98] Added forgotten i18n translation of "liens de parenté" (title)
+    and added "head_no_page_title" in util's interface.
+  - [14/12/98] Improved speed in families update: check_noloop made too
+    many accesses to the base (unnecessary accesses to "persons").
+  - [13/12/98] In src/num.ml, display at least "0" when number is 0!
+  - [12/12/98] Fixed horrible programming of base patches applying, which
+    resulted in much memory allocation and time losing for bases having many
+    added "things" (persons, families, strings). Now the code is cleaner.
+    Consequence: saved speed and memory allocation in such bases in gwd,
+    gwu, gwb2ged.
+  - [11/12/98] Fixed bugs: newlines at end of fields displayed as newlines
+    by "gwu", resulting of future syntax errors in "gwc"
+
+* GeneWeb uncompiler (gwu)
+  - [11/12/98..12/12/98] Improved program (diminution of number of accesses
+    to the base) to allow option "-mem"
+
+* Most descendants (mostdesc.out)
+  - [29/12/98] Sort persons with same number of time by alphabetic order.
+
+* tools/camlp4_depend.sh
+  - [13/12/98] Deleted "./" in depended file name, because that worked bad
+    in alpha.
+
+GeneWeb Version 1.09
+--------------------
+
+* gwc:
+  - Added lazy building of topological sort file inside bases (accelerate
+    Sosa number computing in personal pages and relationship links).
+  - Send error and warning messages on stdout, instead of stderr.
+  - Delete non printable characters (e.g. newlines) in strings (first names,
+    etc.) coming from forms.
+  - Fixed some displaying and behavior bugs when adding elements in merging
+    forms.
+  - Fixed some displayed "value=" when the value hold the " character
+  - Some parts of relationship computing use big nums (module Num). Still
+    incomplete.
+  - Change in request syntax "relation... with..." to allow
+    explicit first names and surnames instead of i=.
+    Ex:
+     old syntax (still there for compatibility during some versions)
+       base?e=m%3DR%3Bi%3D31440&m=NG&n=somebody&t=PN
+     new syntax:
+       base?em=R;ei=31440&m=NG&n=somebody&t=PN
+     and ability to write in a direct link:
+       base?em=R;ep=jack;en=nicholson;eoc=3&m=NG&n=somebody&t=PN
+     to be somewhat independent from the index of "jack nicholson" in
+     the base.
+  - Hidden options in requests:
+       ";opt=from" in personal pages, gives the .gw origin file (if any)
+       ";opt=misc" in personal pages, gives the list of miscellaneous names
+  - More complete traces in CGI mode
+
+* ged2gwb:
+  - Display message "Strange input" giving the line number instead of character
+    number.
+
+* added tools/camlp4_depend.sh to compute dependencies with camlp4 .cmo files
+  in src directory.
+
+* added program "mostdesc" (not distributed in executable versions) computing
+  the "most descendants from someone".
+
+* changed "pauillac" into "cristal" in addresses.
+
+GeneWeb Version 1.08
+--------------------
+
+* gwc:
+  - Changed HTML generated by "last 10 births".
+  - strip possible newlines in sources and comments while updating or
+    creating families
+  - small change in warning message telling that children has been reordered:
+    "before" persons are no more clickable
+  - forgot to reset some fields when a person is deleted
+
+GeneWeb Version 1.07
+--------------------
+
+* Documented structure of bases (file iobase.ml).
+* ANSEL encoding in base
+
+* gwc:
+   - Fixed bug: hash table now with "crush_lower" names, not "strip_lower"
+     because error while compiling base with names "Marie d'Orange" and
+     "Marie Dorange", different in "gwd" but equal (beforewards) in "gwc".
+   - Fixed bug: while decoding strings fields, forgot to skip the possible
+     space (underscored).
+   - A file "command.txt" is created into the base, showing the command
+     line used like for the command "ged2gwb".
+
+* gwd:
+  - Don't display person number any more in update form when holding ? in
+    his/her surname or first name
+  - Fixed bug: when updating person, checks were done before patch.
+  - Strip spaces of first names and surnames in forms.
+
+* consang:
+  - fixed bug: raised error for empty databases
+
+* ged2gwb
+  - not error if no space after initial number
+
+GeneWeb Version 1.06
+--------------------
+
+* Restructuration (perestroika) for distribution of sources.
+
+* Some changes for compilation with version 2.00 of OCaml and Camlp4.
+
+* gwd:
+  - added cannot change sex of married person while updating person,
+    this check was missing
+  - changed Name.crush to separate case "roman numbers" and "i" is now
+    treated as other vowels
+  - changed "(%d fois)" into "(%d)" in "descendants, only the selected
+    generation".
+  - updateInd.ml: display number = index for first name or surname = "?"
+
+* gwu:
+  - fixed bug of behavior: created files even if not option -odir
+
+* lexicon.txt:
+  - integrated Lars' updates for swedish version... in fact integrated in
+    "intermediate" version 1.05.
+
+GeneWeb Version 1.05
+--------------------
+
+* gwc:
+  - added "wrap=virtual" in notes updating.
+  - added 1 generation in missing ancestors (because if a level complete =>
+    nothing printed!)
+  - fixed "Chantal.1 N..." did not work because of searching . from the right
+  - generated images have now "content-length" (necessary for Netscape 2)
+  - srcfile.ml: accept now [] in txt files => translation!
+  - p.birth is now of type Adef.codate
+  - suppressed nobr in descend.ml
+  - suppressed <ul></ul> with no <li> in descend.ml
+  - fixed bug: when creating or modifying someone, the test of existing was
+    firstname1 ^ surname1 = firstname2 ^ surname2 instead of
+    firstname1 = firstname2 && surname1 = surname2
+  - Soza -> Sosa
+
+GeneWeb Version 1.04
+--------------------
+
+* gwc:
+  - added magic number in gwo files.
+  - in case of option error, does not display usage, just invitation to
+    use the -help option
+
+* gwd:
+  - fixed bug in relation: if same person, was not detected.
+  - using new pa_html.cmo
+  - added option "-nolock" not to create lock files; drawback: risk of
+    scratching counter (not grave), or the database, if two users attempt
+    to modify it at the same time; this option were only in Unix version,
+    it is now added in Windows version too.
+  - in research by names, "s" ending words are ignored
+  - when refusing a log (fucking robots!), return status 403 and a small
+    message; logs in "refuse_log".
+  - added option -robot_xcl to test fast attacks.
+  - fixed bug descend "only the generation concerned": persons descending
+    several time were not factorized.
+
+* gwd, consang:
+  - in Windows NT/95, locking files never blocks: the action is just
+    refused =>
+    * when updating the base, if the base cannot be locked, the update is
+      rejected.
+    * when applying "consang", if the base cannot be locked, "consang" is
+      rejected.
+    * if the counter file cannot be locked, the counter is just not updated.
+
+* gwc, gwu:
+  - added "csrc" to factorize "#src" when all children have the same
+
+GeneWeb Version 1.03
+--------------------
+
+* gwd:
+  - ascend.ml & relation.ml: print up to faster thanks to maxlen added (l=...)
+  - capitalization of all letters with accents is now ok
+  - added "gwd.xcl" to exclude connexions
+
+* Makefiles:
+  - add and use of tools/camlp4_comm.sh
+
+GeneWeb Version 1.02
+--------------------
+
+* gwd
+  - lower threshold for optimized relationship link from 25 to 15.
+
+* gwc
+  - in photos => recode underscores (transformed into spaces!).
+  - Can now wait for 4 clients in the queue (listen 4).
+
+GeneWeb Version 1.01
+--------------------
+
+* gwd
+  - saw that sometimes "accept" fails for other reasons than timeout => no
+    more message now in the trace.
+
+GeneWeb Version 1.0
+-------------------
+
+GeneWeb Version 1.0 beta.10
+---------------------------
+
+GeneWeb Version 1.0 beta.9
+--------------------------
+
+* gwd
+  - added possible sleep in env to test memory consummation
+  - changed algorithm of last n births: was o(n^2), now o(n*log n)
+
+GeneWeb Version 1.0 beta.8
+--------------------------
+
+* gwd
+  - fixed problem of Maertens: "Cannot access to start.txt", although
+    it was a problem of accessing "copyright.txt"
+  - "%f" in language files (used in version.txt) do not generate just
+    "command", but "command?" if not cgi and "command?b=base;" if cgi
+
+GeneWeb Version 1.0 beta.7
+--------------------------
+
+- changed big num (e.g. for Soza numbers) => no limit
+- HTTP protocol: always return status 202 OK, even on errors
+- lang/lexicon.txt: nth generation go up to 125 (fr)
+- ged2gwb: if surname or first name of someone = "?", may transform it
+  into "x" (to preserve consistency between gwb2gw and gwc)
+- fixed problem of alphabetic order in displaying by titles
+- trailer always included even in source files, which must not yet hold
+  </body> at their end.
+- copyright added at end if file "copyright.txt" not accessible but
+  without link to my site.
+- file "copyright.txt" changed into "copyr.txt" (I am afraid of problems
+  of long file names in Windows).
+- fixed bug: problems of <em> and </a> in displaying "ancestors .. up to .."
