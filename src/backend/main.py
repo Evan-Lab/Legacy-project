@@ -4,6 +4,7 @@ from src.database import init_db
 
 from src import (
     app,
+    view,  # noqa: F401
     api,  # noqa: F401
 )
 

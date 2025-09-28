@@ -1,3 +1,4 @@
+from src.dto.first_name import FirstNameDto
 from src.models import Base, Individual
 from src.service.book import BookService
 
@@ -42,3 +43,26 @@ def test_individuals_count_is_scoped_to_base(session):
     service = BookService(session, base)
 
     assert service.individuals_count() == 1
+
+
+def test_first_name_alphabetical_groups_and_sorts_names(session):
+    base = Base(name="grouped")
+    base.individuals = [
+        Individual(name="alice"),
+        Individual(name="Aaron"),
+        Individual(name="bob"),
+        Individual(name="Charlie"),
+        Individual(name="carol"),
+    ]
+    session.add(base)
+    session.commit()
+    session.refresh(base)
+
+    service = BookService(session, base)
+
+    result = service.first_name_alphabetical()
+
+    assert result.total == 5
+    assert [FirstNameDto(name="Aaron"), FirstNameDto(name="alice")] == result.A
+    assert [FirstNameDto(name="bob")] == result.B
+    assert [FirstNameDto(name="Charlie"), FirstNameDto(name="carol")] == result.C
