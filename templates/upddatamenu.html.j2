@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <!-- $Id: upddatamenu.txt v7.1 10/01/2023 20:01:49 $ -->
+  <!-- Copyright (c) 2006-2007 INRIA -->
+  <title>{{ t('*lists', 0) }}</title>
+  <meta name="robots" content="none">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="shortcut icon" href="{{ images_prefix }}favicon_gwd.png">
+  {% include 'css.html.j2' %}
+</head>
+<body{{ body_prop | safe }}>
+  {% include 'hed.html.j2' %}
+  {% include 'home.html.j2' %}
+
+  <div class="container">
+    {% include 'trl.html.j2' %}
+    {% include 'copyr.html.j2' %}
+  </div>
+
+  {% include 'js.html.j2' %}
+  {{ query_time | safe }}
+</body>
+</html>

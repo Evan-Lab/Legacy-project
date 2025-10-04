@@ -1,0 +1,93 @@
+{# <!-- $Id: updmenu.txt v7.0 28/04/2017 09:34:30 $ --> #}
+{# used for jquery. old updmenu.txt is in updmenu1.txt #}
+{# track modifications made in templm/updmenu.txt #}
+
+{% macro jq1() %}
+  <div id="jql">
+  {% if has_birth_date %}{{ slash_birth_date }}
+  {% elif has_baptism_date %}{{ slash_baptism_date }}
+  {% endif %}
+   - 
+  {% if has_death_date %}{{ slash_death_date }}
+  {% elif has_burial_date %}{{ slash_burial_date }}
+  {% elif has_cremation_date %}{{ slash_cremation_date }}
+  {% endif %}
+  </div>
+  <div id="jq7">{% if first_name == "?" or surname == "?" %}{{ index }}{% else %}{{ occ }}{% endif %}</div>
+  <div id="jq8">{{ first_name }}</div>
+  <div id="jq9">{{ surname }}</div>
+  <div id="jq10">{{ index }}</div>
+  <div id="jq11">{{ sex }}</div>
+{% endmacro %}
+
+{% macro jq1a(z1, z2) %}
+  {% set lbp %}
+    {% if z1.has_birth_place %}{{ z1.birth_place }}
+    {% elif z1.has_baptism_place %}{{ z1.baptism_place }}
+    {% endif %}
+  {% endset %}
+  
+  {% set ldp %}
+    {% if z1.is_dead %}
+      {% if z1.has_death_place %}{{ z1.death_place }}
+      {% elif z1.has_burial_place %}{{ z1.burial_place }}
+      {% elif z1.has_cremation_place %}{{ z1.cremation_place }}
+      {% endif %}
+    {% endif %}
+  {% endset %}
+  
+  <div id="jql"> </div>
+  <div id="{{ z2 }}jq2">
+    {% if z1.has_birth_date %}{{ z1.slash_birth_date }}
+    {% elif z1.has_baptism_date %}{{ z1.slash_baptism_date }}
+    {% endif %}
+     · {{ lbp }}
+  </div>
+  <div id="{{ z2 }}jq3">
+    {% if z1.is_dead %}
+      {% if z1.has_death_date %}{{ z1.slash_death_date }}
+      {% elif z1.has_burial_date %}{{ z1.slash_burial_date }}
+      {% elif z1.has_cremation_date %}{{ z1.slash_cremation_date }}
+      {% endif %}
+       · {{ ldp }}
+    {% endif %}
+  </div>
+  <div id="{{ z2 }}jq4">{{ z1.occupation }}</div>
+  <div id="{{ z2 }}jq5">{{ lbp }}</div>
+  <div id="{{ z2 }}jq6">{{ ldp }}</div>
+  <div id="{{ z2 }}jq7">{% if z1.first_name == "?" or z1.surname == "?" %}{{ z1.index }}{% else %}{{ z1.occ }}{% endif %}</div>
+  <div id="{{ z2 }}jq8">{{ z1.first_name }}</div>
+  <div id="{{ z2 }}jq9">{{ z1.surname }}</div>
+  <div id="{{ z2 }}jq11">{{ z1.sex }}</div>
+{% endmacro %}
+
+{% macro jq1b() %}
+  {{ jq1a(self, 'pa1') }}
+  {% if has_families %}
+    {% for family in families %}
+      {% if family.index == evar.ifam %}
+        {{ jq1a(family.spouse, 'pa2') }}
+        {% if family.has_children %}
+          {% for child in family.children %}
+            {% set l1 = 'ch' ~ loop.index %}
+            {{ jq1a(child, l1) }}
+          {% endfor %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+{% endmacro %}
+
+{% if evar.jq1 == "on" %}
+  {{ jq1() }}
+{% elif evar.jq1a == "on" %}
+  {{ jq1a(self, '') }}
+{% elif evar.jq1b == "on" %}
+  {{ jq1b() }}
+{% elif evar.upddag == "on" %}
+  <div class="container">
+    {% include 'templm/upddag.html.j2' %}
+  </div>
+{% else %}
+  {% include 'updmenu1.html.j2' %}
+{% endif %}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="{% if bvar.default_lang != '' and evar.lang == '' %}{{ bvar.default_lang }}{% elif evar.lang != '' %}{{ evar.lang }}{% else %}en{% endif %}">
+<head>
+  <!-- $Id: updmenu1.txt v7.1 04/03/2023 10:39:01 $ -->
+  <!-- Copyright (c) 1998-2007 INRIA -->
+  <title>{{ t('*update', 0) }}</title>
+  <meta name="robots" content="none">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="shortcut icon" href="{{ images_prefix }}favicon_gwd.png">
+  {% include 'favicon.html.j2' %}
+  {% include 'css.html.j2' %}
+</head>
+<body{{ body_prop | safe }}>
+  {% include 'hed.html.j2' %}
+  {{ message_to_wizard | safe }}
+
+  <div class="container">
+    {% include 'perso_header.html.j2' %}
+
+    <h1>
+      {{ t('*update', 0) }}:<br>
+      {{ first_name }}
+      .{% if first_name == "?" or surname == "?" %}{{ index }}{% else %}{{ occ }}{% endif %} {{ surname }}
+    </h1>
+
+    <table border="{{ border }}" width="90%">
+      <tr align="{{ left }}">
+        <th align="{{ left }}" style="color:{{ highlight }}">{{ t('*family/families', 1) }}</th>
+      </tr>
+      <tr align="{{ left }}">
+        <td valign="top">
+          {% for family in families %}
+            {% if loop.index > 1 %}
+              <a href="{{ prefix }}m=INV_FAM&i={{ index }}&f={{ family.index }}">{{ t('*invert', 0) }}</a>
+              <br>
+              {% if family.father.index == loop.previtem.father.index and family.mother.index == loop.previtem.mother.index %}
+                <a href="{{ prefix }}m=MRG_FAM&i={{ loop.previtem.index }}&i2={{ family.index }}&ip={{ index }}">{{ t('*merge::', 0) }}</a>
+                <br>
+              {% endif %}
+            {% endif %}
+            <a href="{{ prefix }}m=MOD_FAM&i={{ family.index }}&ip={{ index }}"{% if nb_families == 1 %} accesskey="F"{% endif %}>
+            {{ t('*modify::family/families', 0) }}{% if nb_families == 1 %} {% endif %}</a>
+            <em>{{ t('with', 0) }} {{ family.spouse.first_name }}.{{ family.spouse.occ }} {{ family.spouse.surname }}</em>
+            <br>
+            <a href="{{ prefix }}m=DEL_FAM&i={{ family.index }}&ip={{ index }}">
+            {{ t('*delete::family/families', 0) }}</a>
+            <em>{{ t('with', 0) }} {{ family.spouse.first_name }}.{{ family.spouse.occ }} {{ family.spouse.surname }}</em>
+            <br>
+          {% endfor %}
+          <br>
+          {% if (first_name == "?" or surname == "?") and (nb_families != 0 or has_parents) %}
+          {% elif not is_male and not is_female %}
+            <a href="{{ prefix }}m=ADD_FAM&ip={{ index }}&sex=M">
+            {{ t('*add::marriage/marriages', 0) }} ({{ t('M/F', 0) }})</a>
+            <br>
+            <a href="{{ prefix }}m=ADD_FAM&ip={{ index }}&sex=F">
+            {{ t('*add::marriage/marriages', 0) }} ({{ t('M/F', 1) }})</a>
+            <br>
+          {% else %}
+            <a href="{{ prefix }}m=ADD_FAM&ip={{ index }}" accesskey="A">
+            {{ t('*add::marriage/marriages', 0) }} </a>
+            <br>
+          {% endif %}
+          {% if nb_children != 0 %}
+            <br>
+            <a href="{{ prefix }}m=CHG_CHN&ip={{ index }}">{{ t('*change children\'s names', 0) }}</a>
+          {% endif %}
+          {% if has_possible_duplications %}
+            <br>
+            <a href="{{ prefix }}m=MRG_DUP&ip={{ index }}">
+            {{ t('*merge::possible duplications', 0) }}</a>
+          {% endif %}
+        </td>
+      </tr>
+    </table>
+
+    {% macro hint(xx) %}
+      {{ t('*to add a child to a family, use "%s"', 0, xx) }}
+    {% endmacro %}
+
+    {% if nb_families != 0 %}
+      <p>
+        {{ hint(t('*modify::family/families', 0)) }}
+        <br>
+      </p>
+    {% endif %}
+
+    {% include 'trl.html.j2' %}
+    {% include 'copyr.html.j2' %}
+  </div>
+
+  {% include 'js.html.j2' %}
+  {{ query_time | safe }}
+</body>
+</html>
