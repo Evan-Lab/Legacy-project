@@ -1,0 +1,885 @@
+{# --------------------------------------------------------------------
+  Display livre d'ascendance (Ancestor Book)
+  Converted from OCaml template syntax to Jinja2
+-------------------------------------------------------------------- #}
+
+{# Helper variable #}
+{% set in_place = '-' if roglo else t('in (place)', 0) %}
+
+{# ==================== MACROS ==================== #}
+
+{# Generation text helpers #}
+{% macro tothegen(xx) -%}
+  {{ t('to the %s generation', 0, xx) }}
+{%- endmacro %}
+
+{% macro togen(xx) -%}
+  {% if xx == 0 %}{{ t('specify::generation/generations', 0) }}0
+  {% elif xx == 1 %}{{ t('to the parents', 0) }}
+  {% elif xx == 2 %}{{ t('to the grandparents', 0) }}
+  {% elif xx == 3 %}{{ t('to the great-grandparents', 0) }}
+  {% else %}{{ tothegen(nth(t('nth (generation)', 0), xx)) }}
+  {% endif %}
+{%- endmacro %}
+
+{% macro thegen(xx) -%}
+  {{ t('the %s generation', 0, xx) }}
+{%- endmacro %}
+
+{% macro gena(xx) -%}
+  {% if xx == 0 %}{{ t('*specify::generation/generations', 0) }}0
+  {% elif xx == 1 %}{{ t('*the parents', 0) }}
+  {% elif xx == 2 %}{{ t('*the grandparents', 0) }}
+  {% elif xx == 3 %}{{ t('*the great-grandparents', 0) }}
+  {% else %}{{ thegen(nth(t('nth (generation)', 0), xx)) }}
+  {% endif %}
+{%- endmacro %}
+
+{% macro on_side(xx) -%}
+  {{ t("*on %s's side", 0, xx) }}
+{%- endmacro %}
+
+{# Relation type text #}
+{% macro relation_type_txt(xx, sex) -%}
+  {% if xx == t('adoptive father/adoptive mother/adoptive parents', 2) %}
+    {{ capitalize(nth(t('adoptive father/adoptive mother/adoptive parents', 0), sex)) }}
+  {% elif xx == t('recognizing father/recognizing mother/recognizing parents', 2) %}
+    {{ capitalize(nth(t('recognizing father/recognizing mother/recognizing parents', 0), sex)) }}
+  {% elif xx == t('candidate father/candidate mother/candidate parents', 2) %}
+    {{ capitalize(nth(t('candidate father/candidate mother/candidate parents', 0), sex)) }}
+  {% elif xx == t('godfather/godmother/godparents', 2) %}
+    {{ capitalize(nth(t('godfather/godmother/godparents', 0), sex)) }}
+  {% elif xx == t('foster father/foster mother/foster parents', 2) %}
+    {{ capitalize(nth(t('foster father/foster mother/foster parents', 0), sex)) }}
+  {% else %}
+    {{ capitalize(xx) }}
+  {% endif %}
+{%- endmacro %}
+
+{# Relation text #}
+{% macro relation_txt(fam) -%}
+  {% if fam.on_marriage_date or fam.marriage_place %}
+    {% if fam.are_married %}
+      {{ t('*married', 0) }} {{ fam.on_marriage_date }} {% if fam.marriage_place %}{{ in_place }} {{ fam.marriage_place }}{% endif %}.
+    {% elif fam.are_not_married %}
+      {{ t('*relation/relations', 0) }} {{ fam.on_marriage_date }} {% if fam.marriage_place %}{{ in_place }} {{ fam.marriage_place }}{% endif %}.
+    {% elif fam.are_engaged %}
+      {{ t('*engaged', 0) }} {{ fam.on_marriage_date }} {% if fam.marriage_place %}{{ in_place }} {{ fam.marriage_place }}{% endif %}.
+    {% elif fam.is_no_sexes_check %}
+      {{ t('*relation/relations', 0) }} {{ fam.on_marriage_date }} {% if fam.marriage_place %}{{ in_place }} {{ fam.marriage_place }}{% endif %}.
+    {% elif fam.is_no_mention %}
+      {{ capitalize(fam.on_marriage_date) }} {% if fam.marriage_place %}{{ in_place }} {{ fam.marriage_place }}{% endif %}.
+    {% endif %}
+  {% endif %}
+{%- endmacro %}
+
+{# Display date columns #}
+{% macro display_date(xx, with_rowspan) -%}
+  <td align="right" width="10" {% if xx.nb_families > 1 and with_rowspan == 1 %}rowspan="{{ xx.nb_families }}"{% endif %}>
+    {% if xx.has_birth_date %}{{ xx.slash_birth_date }}
+    {% elif xx.has_baptism_date %}{{ xx.slash_baptism_date }}
+    {% else %}<span class="fp_date_empty">&nbsp;</span>
+    {% endif %}
+  </td>
+  <td align="center" {% if xx.nb_families > 1 and with_rowspan == 1 %}rowspan="{{ xx.nb_families }}"{% endif %}>
+    {% if xx.has_birth_date or xx.has_baptism_date or xx.has_death_date or xx.has_burial_date %}-
+    {% else %}&nbsp;
+    {% endif %}
+  </td>
+  <td align="right" width="10" {% if xx.nb_families > 1 and with_rowspan == 1 %}rowspan="{{ xx.nb_families }}"{% endif %}>
+    {% if xx.has_death_date %}{{ xx.slash_death_date }}
+    {% elif xx.has_burial_date %}{{ xx.slash_burial_date }}
+    {% else %}<span class="fp_date_empty">&nbsp;</span>
+    {% endif %}
+  </td>
+{%- endmacro %}
+
+{# Display family siblings #}
+{% macro display_family_siblings(xx, count) -%}
+  {% for family in xx.families %}
+    {% if not loop.first %}
+      <tr>
+        <td>{{ family.spouse }}</td>
+        <td align="center">{{ family.nb_children }}</td>
+      </tr>
+    {% endif %}
+  {% endfor %}
+{%- endmacro %}
+
+{# Display siblings #}
+{% macro display_siblings(xx, count) -%}
+  <tr {% if count != 1 %}class="table_content_siblings"{% endif %}>
+    <td {% if xx.nb_families > 1 %}rowspan="{{ xx.nb_families }}"{% endif %}>{{ image_MF(xx) }} {{ xx }}</td>
+    {{ display_date(xx, 1) }}
+    <td>
+      {% for family in xx.families %}
+        {% if loop.first %}{{ family.spouse }}{% endif %}
+      {% endfor %}
+    </td>
+    <td align="center">
+      {% for family in xx.families %}
+        {% if loop.first %}{{ family.nb_children }}{% endif %}
+      {% endfor %}
+    </td>
+  </tr>
+  {% if xx.nb_families > 1 %}
+    {{ display_family_siblings(xx, count) }}
+  {% endif %}
+{%- endmacro %}
+
+{# Display children #}
+{% macro display_children(xx, count) -%}
+  <tr{% if count % 2 == 0 %} class="table_content_odd"{% endif %}>
+    <td>
+      {{ image_MF(xx) }}
+      {{ xx }}
+    </td>
+    {{ display_date(xx, 0) }}
+    <td>{{ xx.birth_place }}</td>
+  </tr>
+{%- endmacro %}
+
+{# Display union/marriage #}
+{% macro display_union(xx, fam) -%}
+  <table class="fp_table" cellspacing="0">
+    <tr>
+      <td width="28"><img src="{{ images_prefix }}marriage.png"></td>
+      <td>
+        <table>
+          <tr>
+            <td>
+              <b>{{ fam.spouse }} </b>
+              {{ fam.spouse.dates }}
+            </td>
+            <td>
+              {% if fam.spouse.has_occupation %}
+                <span class="fp_grey_italic">{{ t('*occupation/occupations', 0) }}:</span>
+                {{ fam.spouse.occupation }}
+              {% endif %}
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2">
+              {{ relation_txt(fam) }}
+              {% if xx.computable_marriage_age %}
+                {% if fam.are_married or fam.are_engaged %}
+                  {{ capitalize(nth(t('groom/bride', 0), xx.sex)) }}: {{ xx.marriage_age }} 
+                {% else %}
+                  {{ capitalize(nth(t('conjoint/conjointe', 0), xx.sex)) }}: {{ xx.marriage_age }} 
+                {% endif %}
+              {% endif %}
+              {% if xx.computable_marriage_age and fam.spouse.computable_marriage_age %} - {% endif %}
+              {% if fam.spouse.computable_marriage_age %}
+                {% if fam.are_married or fam.are_engaged %}
+                  {{ capitalize(nth(t('groom/bride', 0), fam.spouse.sex)) }}: {{ fam.spouse.marriage_age }}
+                {% else %}
+                  {{ capitalize(nth(t('conjoint/conjointe', 0), fam.spouse.sex)) }}: {{ fam.spouse.marriage_age }}
+                {% endif %}
+              {% endif %}
+            </td>
+          </tr>
+          {% if fam.are_divorced or fam.are_separated %}
+            <tr>
+              <td colspan="2">
+                {% if fam.are_divorced %}{{ t('*divorced', 0) }} {{ fam.on_divorce_date }}. {% endif %}
+                {% if fam.are_separated %}{{ t('*separated', 0) }} {{ fam.on_separation_date }}. {% endif %}
+              </td>
+            </tr>
+          {% endif %}
+        </table>
+      </td>
+    </tr>
+  </table><br>
+
+  {% if evar.children == "on" and fam.has_children %}
+    <table class="fp_table_children" cellspacing="0">
+      <tr class="fp_grey">
+        <td>{{ t('*child/children', 1) }}</td>
+        <td colspan="3">{{ t('*date/dates', 1) }}</td>
+        <td>{{ t('*where born', 0) }}</td>
+      </tr>
+      {% for child in fam.children %}
+        {{ display_children(child, loop.index) }}
+      {% endfor %}
+    </table><br>
+  {% endif %}
+
+  {% if evar.comm == "on" and (fam.has_comment or fam.has_marriage_note) %}
+    <table class="fp_marriage_notes">
+      <tr>
+        <td>
+          <span class="textcolor">{{ t('*marriage notes/marriages notes', 0) }}:</span> {{ fam.comment }}
+          {% if fam.has_marriage_note %}{{ fam.marriage_note }}{% endif %}
+        </td>
+      </tr>
+    </table><br>
+  {% endif %}
+{%- endmacro %}
+
+{# Access individual (short) #}
+{% macro access_ind(nnn) -%}
+  {{ nnn }} {{ nnn.dates }}
+{%- endmacro %}
+
+{# Access with number #}
+{% macro access(num, nnn) -%}
+  {{ num }}_
+  {% if num == "1" %}
+    {{ nnn }}{{ nnn.title }}{{ nnn.dates }}<br>
+  {% else %}
+    {{ access_ind(nnn) }}<br>
+  {% endif %}
+{%- endmacro %}
+
+{# Display ASCII tree (5 generations) - Complete implementation #}
+{% macro display_tree(xx) -%}
+  {# Father's side - Generation 5 #}
+  {% if xx.father.has_parents and xx.father.father.has_parents and xx.father.father.father.has_parents %}
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____|
+    {{ access("16", xx.father.father.father.father) }}
+  {% endif %}
+
+  {# Father's paternal grandfather (8) #}
+  {% if xx.father.has_parents and xx.father.father.has_parents %}
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____|
+    {{ access("8", xx.father.father.father) }}
+    {% if xx.father.father.father.has_parents %}
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¯¯¯¯¯|
+      {{ access("17", xx.father.father.father.mother) }}
+    {% else %}
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<br>
+    {% endif %}
+  {% endif %}
+
+  {# Father's father (4) #}
+  {% if xx.father.has_parents %}
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____|
+    {{ access("4", xx.father.father) }}
+  {% endif %}
+
+  {# Father's paternal grandmother (9) #}
+  {% if xx.father.has_parents and xx.father.father.has_parents %}
+    {% if xx.father.father.mother.has_parents %}
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____|
+      {{ access("18", xx.father.father.mother.father) }}
+    {% else %}
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+    {% endif %}
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¯¯¯¯¯|
+    {{ access("9", xx.father.father.mother) }}
+    {% if xx.father.father.mother.has_parents %}
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¯¯¯¯¯|
+      {{ access("19", xx.father.father.mother.mother) }}
+    {% else %}
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<br>
+    {% endif %}
+  {% else %}
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<br>
+  {% endif %}
+
+  {# Father (2) #}
+  |{{ access("2", xx.father) }}
+
+  {# Father's maternal side (10-11, 20-23) #}
+  {% if xx.father.has_parents and xx.father.mother.has_parents %}
+    {% if xx.father.mother.father.has_parents %}
+      |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____|
+      {{ access("20", xx.father.mother.father.father) }}
+    {% else %}
+      |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+    {% endif %}
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____|
+    {{ access("10", xx.father.mother.father) }}
+    {% if xx.father.mother.father.has_parents %}
+      |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¯¯¯¯¯|
+      {{ access("21", xx.father.mother.father.mother) }}
+    {% else %}
+      |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<br>
+    {% endif %}
+  {% else %}
+    {% if xx.father.has_parents %}
+      |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+    {% endif %}
+  {% endif %}
+
+  {% if xx.father.has_parents %}
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¯¯¯¯¯|
+    {{ access("5", xx.father.mother) }}
+  {% endif %}
+
+  {% if xx.father.has_parents and xx.father.mother.has_parents and xx.father.mother.mother.has_parents %}
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____|
+    {{ access("22", xx.father.mother.mother.father) }}
+  {% else %}
+    {% if xx.father.has_parents and xx.father.mother.has_parents %}
+      |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+    {% endif %}
+  {% endif %}
+
+  {% if xx.father.has_parents and xx.father.mother.has_parents %}
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¯¯¯¯¯|
+    {{ access("11", xx.father.mother.mother) }}
+    {% if xx.father.mother.mother.has_parents %}
+      |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¯¯¯¯¯|
+      {{ access("23", xx.father.mother.mother.mother) }}
+    {% endif %}
+  {% endif %}
+
+  {# Root person (1) #}
+  |--{{ access("1", xx) }}
+
+  {# Mother's side (mirror structure: 3, 6-7, 12-15, 24-31) #}
+  {% if xx.mother.has_parents and xx.mother.father.has_parents and xx.mother.father.father.has_parents %}
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____|
+    {{ access("24", xx.mother.father.father.father) }}
+  {% endif %}
+
+  {% if xx.mother.has_parents and xx.mother.father.has_parents %}
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____|
+    {{ access("12", xx.mother.father.father) }}
+    {% if xx.mother.father.father.has_parents %}
+      |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¯¯¯¯¯|
+      {{ access("25", xx.mother.father.father.mother) }}
+    {% else %}
+      |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<br>
+    {% endif %}
+  {% endif %}
+
+  {% if xx.mother.has_parents %}
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____|
+    {{ access("6", xx.mother.father) }}
+  {% endif %}
+
+  {% if xx.mother.has_parents and xx.mother.father.has_parents %}
+    {% if xx.mother.father.mother.has_parents %}
+      |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____|
+      {{ access("26", xx.mother.father.mother.father) }}
+    {% else %}
+      |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+    {% endif %}
+    |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¯¯¯¯¯|
+    {{ access("13", xx.mother.father.mother) }}
+    {% if xx.mother.father.mother.has_parents %}
+      |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¯¯¯¯¯|
+      {{ access("27", xx.mother.father.mother.mother) }}
+    {% endif %}
+  {% else %}
+    {% if xx.mother.has_parents %}
+      |&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<br>
+    {% endif %}
+  {% endif %}
+
+  {# Mother (3) #}
+  |{{ access("3", xx.mother) }}
+
+  {# Mother's maternal side (14-15, 28-31) #}
+  {% if xx.mother.has_parents and xx.mother.mother.has_parents %}
+    {% if xx.mother.mother.father.has_parents %}
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____|
+      {{ access("28", xx.mother.mother.father.father) }}
+    {% else %}
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+    {% endif %}
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____|
+    {{ access("14", xx.mother.mother.father) }}
+    {% if xx.mother.mother.father.has_parents %}
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¯¯¯¯¯|
+      {{ access("29", xx.mother.mother.father.mother) }}
+    {% else %}
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/<br>
+    {% endif %}
+  {% else %}
+    {% if xx.mother.has_parents %}
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+    {% endif %}
+  {% endif %}
+
+  {% if xx.mother.has_parents %}
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¯¯¯¯¯|
+    {{ access("7", xx.mother.mother) }}
+  {% endif %}
+
+  {% if xx.mother.has_parents and xx.mother.mother.has_parents %}
+    {% if xx.mother.mother.mother.has_parents %}
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_____|
+      {{ access("30", xx.mother.mother.mother.father) }}
+    {% else %}
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\<br>
+    {% endif %}
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¯¯¯¯¯|
+    {{ access("15", xx.mother.mother.mother) }}
+    {% if xx.mother.mother.mother.has_parents %}
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;¯¯¯¯¯|
+      {{ access("31", xx.mother.mother.mother.mother) }}
+    {% endif %}
+  {% endif %}
+{%- endmacro %}
+
+{# Print long individual details #}
+{% macro print_long_ind(xx) -%}
+  <div class="fp_person">
+    <table width="100%">
+      <tr>
+        <td>
+          <table>
+            <tr>
+              <td><h2><span class="highlight"><a name="ind_{{ xx.index }}">{{ xx }}</a></span></h2></td>
+              <td>{{ image_MF(xx) }}</td>
+            </tr>
+          </table>
+        </td>
+        <td align="right">
+          {% if evar.sosa == "on" and xx.has_sosa %}
+            <span>
+              <img src="{{ images_prefix }}sosa.png" alt="sosa" title="sosa"> {{ t('*Sosa', 0) }} {{ xx.sosa }}
+            </span>
+          {% endif %}
+        </td>
+      </tr>
+    </table>
+
+    <div class="fp_person_info">
+      {% if not e.im and xx.has_image %}
+        <table width="100%">
+          <tr>
+            <td width="30">
+              <img src="{{ xx.image_url }}"{{ xx.image_size }} alt="{{ t('image/images', 0) }}" border="0">
+            </td>
+            <td valign="top">
+      {% endif %}
+
+      <ul class="fp_person_info_ul">
+        {% if xx.has_aliases %}
+          <li>
+            <span class="fp_grey_italic">{{ t('*alias', 0) }}:</span>
+            {% for alias in xx.aliases %}
+              <em>{% if not loop.first %},{% endif %}&nbsp;{{ alias }}</em>
+            {% endfor %}
+          </li>
+        {% endif %}
+
+        {% if xx.has_nobility_titles %}
+          <li>
+            <span class="fp_grey_italic">{{ t('*title/titles', 1) }}:</span>
+            <em>
+              {% for title in xx.nobility_titles %}
+                {% if not loop.first %},{% endif %}
+                {{ title }}
+              {% endfor %}
+            </em>
+          </li>
+        {% endif %}
+
+        {% if xx.has_occupation %}
+          <li>
+            <span class="fp_grey_italic">{{ t('*occupation/occupations', 0) }}:</span>
+            {{ xx.occupation }}
+          </li>
+        {% endif %}
+
+        {% if (xx.has_aliases or xx.has_nobility_titles or xx.has_occupation) and 
+             ((xx.has_birth_date or xx.has_birth_place) or (xx.has_baptism_date or xx.has_baptism_place) or
+              (xx.has_death_date or xx.has_death_place) or (xx.has_burial_date or xx.has_burial_place)) %}
+          <li><hr></li>
+        {% endif %}
+
+        {% if xx.has_birth_date or xx.has_birth_place %}
+          <li>
+            <span class="fp_grey_italic">{{ capitalize(nth(t('born', 0), xx.sex)) }}</span>
+            {{ xx.on_birth_date }}
+            {% if xx.has_birth_place %} {{ in_place }} {{ xx.birth_place }}{% endif %}
+          </li>
+        {% endif %}
+
+        {% if xx.has_baptism_date or xx.has_baptism_place %}
+          <li>
+            <span class="fp_grey_italic">{{ capitalize(nth(t('baptized', 0), xx.sex)) }}</span>
+            {{ xx.on_baptism_date }}
+            {% if xx.has_baptism_place %} {{ in_place }} {{ xx.baptism_place }}{% endif %}
+          </li>
+        {% endif %}
+
+        {% if xx.has_death_date or xx.has_death_place %}
+          <li>
+            <span class="fp_grey_italic">{{ capitalize(nth(t('died', 0), xx.sex)) }}</span>
+            {{ xx.on_death_date }}
+            {% if xx.computable_death_age %} {{ t('aged', 0) }} {{ xx.death_age }},{% endif %}
+            {% if xx.has_death_place %} {{ in_place }} {{ xx.death_place }}{% endif %}
+          </li>
+        {% endif %}
+
+        {% if xx.is_buried %}
+          <li>
+            <span class="fp_grey_italic">{{ capitalize(nth(t('buried', 0), xx.sex)) }}</span>
+            {{ xx.on_burial_date }}
+            {% if xx.has_burial_place %} {{ in_place }} {{ xx.burial_place }}{% endif %}
+          </li>
+        {% endif %}
+
+        {% if xx.is_cremated %}
+          <li>
+            <span class="fp_grey_italic">{{ capitalize(nth(t('cremated', 0), xx.sex)) }}</span>
+            {{ xx.on_cremation_date }}
+            {% if xx.has_cremation_place %} {{ in_place }} {{ xx.cremation_place }}{% endif %}
+          </li>
+        {% endif %}
+      </ul>
+
+      {% if not e.im and xx.has_image %}
+        </td></tr></table>
+      {% endif %}
+    </div>
+  </div>
+
+  {# Parents section #}
+  {% if evar.parents == "on" and xx.has_parents %}
+    <table class="fp_table_parent" cellspacing="0">
+      <tr><th colspan="2">{{ t('*parents', 0) }}</th></tr>
+      <tr>
+        <td>
+          <span class="fp_grey_italic">{{ capitalize(nth(t('father/mother', 0), xx.father.sex)) }}:</span>
+          {{ xx.father }}
+          {% if xx.father_age_at_birth %} ({{ xx.father_age_at_birth }}){% endif %}
+        </td>
+        <td>
+          {% if xx.father.has_occupation %}
+            <span class="fp_grey_italic">{{ t('*occupation/occupations', 0) }}:</span>
+            {{ xx.father.occupation }}
+          {% endif %}
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <span class="fp_grey_italic">{{ capitalize(nth(t('father/mother', 0), xx.mother.sex)) }}:</span>
+          {{ xx.mother }}
+          {% if xx.mother_age_at_birth %} ({{ xx.mother_age_at_birth }}){% endif %}
+        </td>
+        <td>
+          {% if xx.mother.has_occupation %}
+            <span class="fp_grey_italic">{{ t('*occupation/occupations', 0) }}:</span>
+            {{ xx.mother.occupation }}
+          {% endif %}
+        </td>
+      </tr>
+    </table>
+  {% endif %}
+
+  {# Siblings section #}
+  {% if evar.siblings == "on" and (xx.has_siblings or (xx.has_parents and (xx.father.nb_families > 1 or xx.mother.nb_families > 1))) %}
+    <div style="page-break-inside:avoid;">
+      <table class="fp_table_siblings" cellspacing="0">
+        {% if xx.has_siblings %}
+          <tr><th colspan="6">{{ t('*full siblings', 0) }}</th></tr>
+          <tr class="fp_grey">
+            <td>{{ t('*name', 0) }}</td>
+            <td colspan="3">{{ t('*date/dates', 1) }}</td>
+            <td>{{ t('*spouse/spouses', 0) }}</td>
+            <td align="center">{{ t('*child/children', 1) }}</td>
+          </tr>
+          {% for child in xx.father.children %}
+            {{ display_siblings(child, loop.index) }}
+          {% endfor %}
+        {% endif %}
+
+        {% if xx.has_parents %}
+          {% if xx.father.nb_families > 1 or xx.mother.nb_families > 1 %}
+            {% set half_father_count = namespace(value=0) %}
+            {% for family in xx.father.families %}
+              {% if family.spouse.index != xx.mother.index and family.nb_children > 0 %}
+                {% set half_father_count.value = half_father_count.value + 1 %}
+              {% endif %}
+            {% endfor %}
+            
+            {% set half_mother_count = namespace(value=0) %}
+            {% for family in xx.mother.families %}
+              {% if family.spouse.index != xx.father.index and family.nb_children > 0 %}
+                {% set half_mother_count.value = half_mother_count.value + 1 %}
+              {% endif %}
+            {% endfor %}
+
+            {% if half_father_count.value != 0 or half_mother_count.value != 0 %}
+              {% if xx.has_siblings %}<tr><td colspan="6">&nbsp;</td></tr>{% endif %}
+              <tr><th colspan="6">{{ t('*half-brothers/half-sisters/half-siblings', 2) }}</th></tr>
+              <tr class="fp_grey">
+                <td>{{ t('*name', 0) }}</td>
+                <td colspan="3">{{ t('*date/dates', 1) }}</td>
+                <td>{{ t('*spouse/spouses', 0) }}</td>
+                <td align="center">{{ t('*child/children', 1) }}</td>
+              </tr>
+              
+              {% if half_father_count.value != 0 %}
+                {% for family in xx.father.families %}
+                  {% if family.spouse.index != xx.mother.index and family.has_children %}
+                    <tr class="fp_half_siblings">
+                      <td colspan="6">{{ on_side(xx.father) }} {{ t('with', 0) }} {{ family.spouse }}</td>
+                    </tr>
+                    {% for child in family.children %}
+                      {{ display_siblings(child, loop.index) }}
+                    {% endfor %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+              
+              {% if half_mother_count.value != 0 %}
+                {% for family in xx.mother.families %}
+                  {% if family.spouse.index != xx.father.index and family.has_children %}
+                    <tr class="fp_half_siblings">
+                      <td colspan="6">{{ on_side(xx.mother) }} {{ t('with', 0) }} {{ family.spouse }}</td>
+                    </tr>
+                    {% for child in family.children %}
+                      {{ display_siblings(child, loop.index) }}
+                    {% endfor %}
+                  {% endif %}
+                {% endfor %}
+              {% endif %}
+            {% endif %}
+          {% endif %}
+        {% endif %}
+      </table>
+    </div>
+  {% endif %}
+
+  {# Relations section #}
+  {% set witness_count = namespace(value=0) %}
+  {% if xx.has_families %}
+    {% for family in xx.families %}
+      {% if family.has_witnesses %}
+        {% set witness_count.value = witness_count.value + 1 %}
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
+  {% if evar.rel == "on" and (xx.has_relations or witness_count.value > 0) %}
+    <div style="page-break-inside:avoid;">
+      <table class="fp_table_relations" cellspacing="0">
+        <tr><th colspan="4" class="background-color">{{ t('*relation/relations', 1) }}</th></tr>
+        <tr class="fp_grey">
+          <td class="borderna">{{ t('*name', 0) }}</td>
+          <td class="borderna" colspan="3">{{ t('*date/dates', 1) }}</td>
+        </tr>
+
+        {% for relation in xx.relations %}
+          {% if relation.has_relation_him and relation.has_relation_her %}
+            <tr class="table_content_relations">
+              <td class="borderna">
+                {{ image_MF(relation.relation_him) }} {{ relation.relation_him }} 
+                ({{ relation_type_txt(relation.relation_type, relation.relation_him.sex) }})
+              </td>
+              {{ display_date(relation.relation_him, 0) }}
+            </tr>
+            <tr class="table_content_relations">
+              <td class="borderna">
+                {{ image_MF(relation.relation_her) }} {{ relation.relation_her }} 
+                ({{ relation_type_txt(relation.relation_type, relation.relation_her.sex) }})
+              </td>
+              {{ display_date(relation.relation_her, 0) }}
+            </tr>
+          {% elif relation.has_relation_him %}
+            <tr class="table_content_relations">
+              <td class="borderna">
+                {{ image_MF(relation.relation_him) }} {{ relation.relation_him }} 
+                ({{ capitalize(relation.relation_type) }})
+              </td>
+              {{ display_date(relation.relation_him, 0) }}
+            </tr>
+          {% elif relation.has_relation_her %}
+            <tr class="table_content_relations">
+              <td class="borderna">
+                {{ image_MF(relation.relation_her) }} {{ relation.relation_her }} 
+                ({{ capitalize(relation.relation_type) }})
+              </td>
+              {{ display_date(relation.relation_her, 0) }}
+            </tr>
+          {% endif %}
+        {% endfor %}
+
+        {% for related in xx.related_persons %}
+          <tr class="table_content_relations">
+            <td class="borderna">
+              {{ image_MF(related) }} {{ related }}  
+              {% if related == t('foster son/foster daughter/foster child', 0) %}
+                ({{ capitalize(t('foster son/foster daughter/foster child', 2)) }})
+              {% elif related == t('foster son/foster daughter/foster child', 1) %}
+                ({{ capitalize(t('foster son/foster daughter/foster child', 2)) }})
+              {% else %}
+                ({{ capitalize(related.related_type) }})
+              {% endif %}
+            </td>
+            {{ display_date(related, 0) }}
+          </tr>
+        {% endfor %}
+
+        {% if xx.has_families %}
+          {% for family in xx.families %}
+            {% if family.has_witnesses %}
+              {% for witness in family.witnesses %}
+                <tr>
+                  <td class="borderna">
+                    {{ image_MF(witness) }} {{ witness }} 
+                    ({{ t('*witness/witnesses', 0) }})
+                  </td>
+                  {{ display_date(witness, 0) }}
+                </tr>
+              {% endfor %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+
+        {% for ewr in xx.event_witness_relations %}
+          <tr class="table_content_relations">
+            <td class="borderna">
+              {{ image_MF(ewr.person) }} {{ ewr.person }} 
+              {% if ewr.event.spouse %}
+                {{ t('and', 0) }}
+                {{ image_MF(ewr.event.spouse) }} {{ ewr.event.spouse }} 
+              {% endif %}
+              ({{ capitalize(ewr.kind) }}: {{ ewr.event.name }})
+            </td>
+            {{ display_date(ewr.person, 0) }}
+          </tr>
+        {% endfor %}
+      </table>
+    </div>
+  {% endif %}
+
+  {# Marriage and children section #}
+  {% if evar.marr == "on" and xx.has_families %}
+    <div style="page-break-inside:avoid;">
+      <table class="fp_table_marriage" cellspacing="0">
+        <tr>
+          <th>
+            {{ t('*marriage/marriages', 'f') }} {% if evar.children == "on" and xx.has_children %}{{ t('and', 0) }} {{ t('child/children', 'c') }}{% endif %}
+          </th>
+        </tr>
+        <tr>
+          <td>
+            {% for family in xx.families %}
+              {{ display_union(xx, family) }}
+              {% if not loop.last %}<hr class="fp_family_separator">{% endif %}
+            {% endfor %}
+          </td>
+        </tr>
+      </table>
+    </div>
+  {% endif %}
+
+  {# Notes and events section #}
+  {% if evar.note == "on" and (xx.has_notes or xx.has_event) %}
+    <div style="page-break-inside:avoid;">
+      <table class="fp_table" cellspacing="0">
+        <tr><th>{{ t('*note/notes', 1) }}</th></tr>
+        <tr><td class="fp_notes">
+          {{ xx.notes }}
+          {% if xx.has_event %}
+            <table>
+              {% for event in xx.events %}
+                <tr>
+                  <td valign="top" style="white-space: nowrap;" width="1">
+                    <span class="edate">
+                      {% if event.has_date %}{{ event.date }} :
+                      {% else %}--- :
+                      {% endif %}
+                    </span>
+                  </td>
+                  <td valign="top">
+                    <span>
+                      {{ capitalize(event.name) }} 
+                      {% if event.has_spouse %}({{ t('with', 0) }} {{ event.spouse }}){% endif %}
+                      {% if event.has_place %} - {{ event.place }}{% endif %}
+                    </span>
+                    {% if event.has_witnesses %}
+                      <p style="margin:0;">
+                        {% for event_witness in event.witnesses %}
+                          <span>{{ capitalize(event_witness.kind) }}:</span>
+                          {{ short_display_person(event_witness) }}<br>
+                        {% endfor %}
+                      </p>
+                    {% endif %}
+                    {% if event.has_note %}<div>{{ event.note }}</div>{% endif %}
+                    {% if event.has_src %}<span><em>{{ t('*source/sources', 1) }}: {{ event.src }}</em>.</span>{% endif %}
+                  </td>
+                </tr>
+              {% endfor %}
+            </table>
+          {% endif %}
+        </td></tr>
+      </table>
+    </div>
+  {% endif %}
+
+  {# Ascendants tree section #}
+  {% if evar.asc == "on" and xx.has_parents %}
+    <div style="page-break-inside:avoid;">
+      <table class="fp_table" cellspacing="0">
+        <tr><th>{{ t('*ascendants tree', 0) }}</th></tr>
+        <tr><td>{{ display_tree(xx) }}</td></tr>
+      </table>
+    </div>
+  {% endif %}
+
+  {# Sources section #}
+  {% if evar.src == "on" and xx.has_sources %}
+    <div style="page-break-inside:avoid;">
+      <table class="fp_table" cellspacing="0">
+        <tr><th>{{ t('*source/sources', 1) }}</th></tr>
+        <tr>
+          <td>
+            <ul class="fp_source">
+              {% for source in xx.sources %}
+                <li>{{ source.type }}: {{ source }}</li>
+              {% endfor %}
+            </ul>
+          </td>
+        </tr>
+      </table>
+    </div>
+  {% endif %}
+{%- endmacro %}
+
+{# ==================== MAIN TEMPLATE ==================== #}
+
+<div class="page_max">
+  {% set nb_gen = min(evar.v, max_anc_level) %}
+  
+  {% if evar.v > 1 %}
+    <span width="100%">
+      <hr>
+      {{ capitalize(nth(t('summary book ascendants', 0), 3)) }}
+      {% if evar.only == "on" %}. {{ t('*only', 0) }} {{ gena(nb_gen) }}{% else %} {{ togen(nb_gen) }}{% endif %}.
+      <hr>
+    </span>
+    <ul class="fp_ul_summary">
+      {% for level_data in ancestor_levels(nb_gen) %}
+        {% if level_data.level > 0 %}
+          <li><b>{{ t('*generation/generations', 0) }} {{ level_data.level }}</b></li>
+        {% endif %}
+        {% if evar.only != "on" or (evar.only == "on" and level_data.level == evar.v) %}
+          {% for ancestor in level_data.ancestors %}
+            {% if not ancestor.same %}
+              <li>
+                <a href="#ind_{{ ancestor.index }}" class="see-more">{{ ancestor }}</a>
+                {% if evar.sosa == "on" and ancestor.has_sosa %}
+                  ({{ t('n° Sosa', 0) }}&nbsp;: {{ ancestor.sosa }})
+                {% endif %}
+              </li>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </ul>
+    <p style="page-break-after:always;">&nbsp;</p>
+  {% endif %}
+
+  {% for level_data in ancestor_levels(nb_gen) %}
+    {% if evar.only != "on" or (evar.only == "on" and level_data.level == evar.v) %}
+      {% for ancestor in level_data.ancestors %}
+        {% if not ancestor.same %}
+          {{ print_long_ind(ancestor) }}
+          {% if not (loop.last and level_data.is_last) %}
+            <p style="page-break-after:always;">&nbsp;</p>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  {% endfor %}
+</div>
