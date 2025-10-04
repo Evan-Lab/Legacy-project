@@ -1,0 +1,53 @@
+{# --------------------------------------------------------------------
+  Redirect notification page
+  -------------------------------------------------------------------- #}
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+
+<head>
+  <title>Address changed</title>
+  <meta name="robots" content="none">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="shortcut icon" href="{{ images_prefix }}favicon_gwd.png">
+
+{% include 'css.html.j2' %}
+{% include 'js.html.j2' %}
+
+</head>
+
+<body>
+
+<div class="container">
+<h1>
+{% if lang == 'en' %}Address changed
+{% elif lang == 'fr' %}Changement d'adresse
+{% endif %}
+</h1>
+
+<p>
+{% if lang == 'en' %}
+The address of this service has changed.
+Please use now:
+{% elif lang == 'fr' %}
+L'adresse du service a changé.
+Utiliser maintenant:
+{% elif lang == 'it' %}
+L'indirizzo di questo service è cambiato.
+Utilizzate:
+{% endif %}
+
+<ul>
+<li><a href="{{ link }}">{{ link }}</a></li>
+</ul>
+</p>
+
+{% include 'trl.html.j2' %}
+{% include 'copyr.html.j2' %}
+
+{{ query_time | safe }}
+
+</div>
+
+</body>
+</html>
