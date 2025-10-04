@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <title>{{ t('*modify::tree', 0) }}</title>
+  <meta name="robots" content="none"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="shortcut icon" href="{{ images_prefix }}favicon_gwd.png">
+  <link rel="apple-touch-icon" href="{{ images_prefix }}favicon_gwd.png">
+  {% include 'css.html.j2' %}
+</head>
+<body{{ body_prop | safe }}>
+  {% include 'hed.html.j2' %}
+  
+  {% set mid = ' class="align-middle"' %}
+  
+  {% macro one_pvar_line(znz, zocz, zfnz, zsnz, zbdz, ztz, zparamz='') %}
+  <tr{{ zparamz | safe }}>
+    <td>
+      <i class="fa fa-plus row_add_before"></i>
+      <i class="fa fa-minus row_del"></i>
+    </td>
+    <td>
+      <i class="fa fa-up-long row_move_up"></i>
+      <i class="fa fa-down-long row_move_down"></i>
+    </td>
+    <td{{ mid | safe }}><input name="oc" class="form-control reset_bd_text" size="5" value="{{ zocz }}"></td>
+    <td{{ mid | safe }}><input name="p" class="form-control reset_bd_text" size="30" value="{{ zfnz }}"></td>
+    <td{{ mid | safe }}><input name="n" class="form-control reset_bd_text" size="30" value="{{ zsnz }}"></td>
+    <td class="bd_text align-middle">{{ zbdz | safe }}</td>
+    <td{{ mid | safe }}><input name="t" class="form-control" size="30" value="{{ ztz }}"></td>
+  </tr>
+  {% endmacro %}
+  
+  {% macro one_pvar(zz) %}
+    {% if e['i' ~ zz] != "" or e['p' ~ zz] != "" %}
+      {% set tmp %}
+        {% if pvar[zz].has_birth_date %}° {{ pvar[zz].slash_birth_date }}
+        {% elif pvar[zz].has_baptism_date %}{{ pvar[zz].slash_baptism_date }}
+        {% endif %}
+        <br>
+        {% if pvar[zz].has_death_date %}† {{ pvar[zz].slash_death_date }}
+        {% elif pvar[zz].has_burial_date %}{{ pvar[zz].slash_burial_date }}
+        {% elif pvar[zz].has_cremation_date %}{{ pvar[zz].slash_cremation_date }}
+        {% endif %}
+      {% endset %}
+      {{ one_pvar_line(zz, pvar[zz].occ, pvar[zz].first_name, pvar[zz].surname, tmp, e['t' ~ zz], '') }}
+      {{ one_pvar(zz + 1) }}
+    {% endif %}
+  {% endmacro %}
+  
+  {% macro my_hidden(xx) %}
+    {% if e[xx] != "" %}<input type="hidden" name="{{ xx }}" value="{{ e[xx] }}">{% endif %}
+  {% endmacro %}
+  
+  <div class="container-fluid">
+    <form id="upd" method="post" action="{{ action }}">
+      <div class="d-flex justify-content-end m-2">
+        <div class="h2">{{ t('*add/clear/show/edit the graph', 3) }}</div>
+        <input type="submit" class="btn btn-primary ml-auto" value="OK">
+      </div>
+      
+      {{ hidden | safe }}
+      <input type="hidden" name="m" value='RLM'>
+      {{ my_hidden('spouse') }}
+      {{ my_hidden('image') }}
+      {{ my_hidden('bd') }}
+      {{ my_hidden('new') }}
+      
+      <table class="table table-hover table-sm">
+        <thead>
+          <tr>
+            <td></td><td></td><td{{ mid | safe }}>#</td>
+            <td{{ mid | safe }}>{{ t('*first name/first names', 0) }}</td>
+            <td{{ mid | safe }}>{{ t('*surname/surnames', 0) }}</td>
+            <td{{ mid | safe }}>{{ t('*birth', 0) }}<br>{{ t('*death', 0) }}</td>
+            <td{{ mid | safe }}>{{ t('*text', 0) }}</td>
+          </tr>
+        </thead>
+        <tbody>
+          {{ one_pvar_line('', '', '', '', '', '', ' id=\'template_line\' style=\'display:none;\'') }}
+          {% if e.i0 != "" and e.p0 != "" %}
+            {{ one_pvar(0) }}
+          {% else %}
+            {{ one_pvar(1) }}
+          {% endif %}
+          <tr class="last_row">
+            <td colspan="7">
+              <i class="fa fa-plus row_add_before w-100"></i>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </form>
+    
+    {% if not cancel_links %}
+      {% include 'trl.html.j2' %}
+      {% include 'copyr.html.j2' %}
+    {% endif %}
+  </div>
+  
+  {% include 'js.html.j2' %}
+  {{ query_time | safe }}
+  
+  <script>
+  $(document).on("click", ".row_add_before", function() {
+    $(this).closest("tr").before(
+      $("#template_line").clone().removeAttr("id").removeAttr("style").get(0)
+    );
+  });
+
+  $(document).on("click", ".row_del", function() {
+    $(this).closest('tr').remove();
+  });
+
+  $(document).on("click", ".row_move_up", function() {
+    var row = $(this).closest("tr");
+    if(row.index() > 1) { // The first row is a template
+      row.insertBefore(row.prev());
+    }
+  });
+
+  $(document).on("click", ".row_move_down", function() {
+    var row = $(this).closest("tr");
+    var row_next = row.next();
+    if(0 != row_next.length && !row_next.hasClass("last_row")) {
+      row.insertAfter(row_next);
+    }
+  });
+
+  $(document).on("change", ".reset_bd_text", function() {
+    $(this).closest("tr").children(".bd_text").html("");
+  });
+
+  $("#upd").submit(function() {
+    event.preventDefault();
+    $(this).find("tr").each(function(index) {
+      if($(this).attr("id") == "template_line") {
+        $(this).find("input[name=oc]").prop("disabled", true);
+        $(this).find("input[name=p]").prop("disabled", true);
+        $(this).find("input[name=n]").prop("disabled", true);
+        $(this).find("input[name=t]").prop("disabled", true);
+      } else {
+        $(this).find("input[name=oc]").attr("name", "oc"+(index-1));
+        $(this).find("input[name=p]").attr("name", "p"+(index-1));
+        $(this).find("input[name=n]").attr("name", "n"+(index-1));
+        $(this).find("input[name=t]").attr("name", "t"+(index-1));
+      }
+    });
+    $(this).unbind('submit').submit();
+  });
+  </script>
+</body>
+</html>
