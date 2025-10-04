@@ -1,0 +1,224 @@
+{# --------------------------------------------------------------------
+  Ported from: relmenu.txt v7.1 22/12/2024 19:06:29
+  Copyright (c) 1998-2007 INRIA
+  
+  Relationship menu - allows user to find relationship between two people
+  -------------------------------------------------------------------- #}
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+
+<head>
+  <!-- $Id: relmenu.txt v7.1 22/12/2024 19:06:29 $ -->
+  <!-- Copyright (c) 1998-2007 INRIA -->
+  <title>{{ t('*link between', 0) }} 
+    {% if p.public_name %}{{ p.public_name }}
+    {% else %}{{ p.first_name }} {{ p.surname }}{% endif %} {{ t('and', 0) }}…
+  </title>
+  <meta name="robots" content="none">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="shortcut icon" href="{{ images_prefix }}favicon_gwd.png">
+  {% include 'favicon.html.j2' %}
+  {% include 'css.html.j2' %}
+</head>
+
+<body{{ body_prop | safe }} onload="main()">
+
+{% include 'hed.html.j2' %}
+
+<div class="container">
+
+{{ message_to_wizard | safe }}
+
+{% include 'perso_header.html.j2' %}
+
+<h1 class="text-center">{{ t('*link between', 0) }} 
+  {% if p.public_name %}{{ p.public_name }}{% else %}{{ p.first_name }}{% endif %}
+  {% if p.qualifier %} <em>{{ p.qualifier }}</em>{% endif %}
+  {{ p.surname }}
+  {% if p.alias %} <em>({{ p.alias }})</em>{% endif %}
+  {{ t('and', 0) }}…
+</h1>
+
+<form name="relationship" method="submit" action="{{ action }}">
+  <div class="row">
+    <div id="rel_form_shortcut" class="col-4">
+      <input type="hidden" name="em" value="R">
+      {% if access_by_key %}
+        <input type="hidden" name="ep" value="{{ p.first_name_key_val }}">
+        <input type="hidden" name="en" value="{{ p.surname_key_val }}">
+        {% if p.occ != "0" %}
+          <input type="hidden" name="eoc" value="{{ p.occ }}">
+        {% endif %}
+      {% else %}
+        <input type="hidden" name="ei" value="{{ p.index }}">
+      {% endif %}
+      <input type="hidden" name="m" value="NG">
+      <span>{{ t('*relationship shortcut', 0) }}:</span>
+      <div class="mt-1 ml-2">
+        {% if (user.index and not browsing_with_sosa_ref) or (browsing_with_sosa_ref and user.index != sosa_ref.index) %}
+          <div class="custom-control custom-radio">
+            <input type="radio" class="custom-control-input" id="sel_user" name="select" value="{{ user.index }}" onclick="main()">
+            <label class="custom-control-label" for="sel_user">{{ user.ident }} ({{ t('user/password/cancel', 0) }})</label>
+          </div>
+        {% endif %}
+        {% if browsing_with_sosa_ref and p.index != sosa_ref.index %}
+          <div class="custom-control custom-radio">
+            <input type="radio" class="custom-control-input" id="sel_sosa" name="select" value="{{ sosa_ref.index }}" onclick="main()">
+            <label class="custom-control-label" for="sel_sosa"><b>{{ sosa_ref }}</b> (<i class="far fa-circle-dot fa-xs text-success mr-1"></i>{{ t('Sosa', 0) }} 1)</label>
+          </div>
+        {% endif %}
+        {% for family in p.families %}
+          {% if family.spouse != "? ?" %}
+            <div class="custom-control custom-radio">
+              <input type="radio" class="custom-control-input" id="sel_spouse_{{ family.spouse.index }}" name="select" value="{{ family.spouse.index }}" onclick="main()">
+              <label class="custom-control-label" for="sel_spouse_{{ family.spouse.index }}">{{ family.spouse }}{% if family.spouse.has_nobility_titles %}, 
+                <em>{{ family.spouse.nobility_title }}</em>{% endif %} ({{ t('spouse/spouses', 0) }})</label>
+            </div>
+          {% endif %}
+        {% endfor %}
+        {% for relation in p.relations %}
+          {% if relation.has_relation_him %}
+            <div class="custom-control custom-radio">
+              <input type="radio" class="custom-control-input" id="sel_rel_him_{{ relation.relation_him.index }}" name="select" value="{{ relation.relation_him.index }}" onclick="main()">
+              <label class="custom-control-label" for="sel_rel_him_{{ relation.relation_him.index }}">{{ relation.relation_him }}{% if relation.relation_him.has_nobility_titles %}, 
+                <em>{{ relation.relation_him.nobility_title }}</em>{% endif %} ({{ relation.relation_him.type }})</label>
+            </div>
+          {% endif %}
+          {% if relation.has_relation_her %}
+            <div class="custom-control custom-radio">
+              <input type="radio" class="custom-control-input" id="sel_rel_her_{{ relation.relation_her.index }}" name="select" value="{{ relation.relation_her.index }}" onclick="main()">
+              <label class="custom-control-label" for="sel_rel_her_{{ relation.relation_her.index }}">{{ relation.relation_her }}{% if relation.relation_her.has_nobility_titles %}, 
+                <em>{{ relation.relation_her.nobility_title }}</em>{% endif %} ({{ relation.relation_her.type }})</label>
+            </div>
+          {% endif %}
+        {% endfor %}
+        {% for related in p.related %}
+          <div class="custom-control custom-radio">
+            <input type="radio" class="custom-control-input" id="sel_related_{{ related.index }}" name="select" value="{{ related.index }}" onclick="main()">
+            <label class="custom-control-label" for="sel_related_{{ related.index }}">{{ related }}{% if related.has_nobility_titles %}, 
+              <em>{{ related.nobility_title }}</em>{% endif %} ({{ related.type }})</label>
+          </div>
+        {% endfor %}
+        {% for event_witness in p.event_witness_relations %}
+          <div class="custom-control custom-radio">
+            <input type="radio" class="custom-control-input" id="sel_witness_{{ event_witness.person.index }}" name="select" value="{{ event_witness.person.index }}" onclick="main()">
+            <label class="custom-control-label" for="sel_witness_{{ event_witness.person.index }}">{{ event_witness.person }} ({{ t('witness/witnesses', 0) }})</label>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col-4">
+      {{ hidden | safe }}
+      <div id="rel_form_search" onclick="document.getElementById('radio_R').checked = 'checked'; main();">
+        <input type="hidden" name="em" value="R">
+        {% if access_by_key %}
+          <input type="hidden" name="ep" value="{{ p.first_name_key_val }}">
+          <input type="hidden" name="en" value="{{ p.surname_key_val }}">
+          {% if p.occ != 0 %}
+            <input type="hidden" name="eoc" value="{{ p.occ }}">
+          {% endif %}
+        {% else %}
+          <input type="hidden" name="ei" value="{{ p.index }}">
+        {% endif %}
+        <input type="hidden" name="m" value="NG">
+        <div class="custom-control custom-radio">
+          <input type="radio" class="custom-control-input" id="radio_R" name="select" value="input" onclick="main()" checked>
+          <label class="custom-control-label" for="radio_R">{{ t('*search/case sensitive', 0) }} {{ t('any individual in the base', 0) }}:</label>
+        </div>
+        <div>
+          <label class="sr-only" for="n">{{ t('*public name', 0) }}, {{ t('alias', 0) }}{% if browsing_with_sosa_ref %}, {{ t('n° Sosa relative to', 0) }}{% endif %}…</label>
+          <input type="search" id="n" class="form-control mt-2" name="n" placeholder="{{ t('*public name', 0) }}, {{ t('alias', 0) }}{% if browsing_with_sosa_ref %}, {{ t('n° Sosa relative to', 0) }}{% endif %}…" autofocus>
+          <label class="sr-only" for="firstname">{{ t('*first name/first names', 0) }}</label>
+          <input type="search" id="firstname" class="form-control mt-2" name="fn" placeholder="{{ t('*first name/first names', 0) }}">
+          <label class="sr-only" for="surname">{{ t('*surname/surnames', 0) }}</label>
+          <input type="search" id="surname" class="form-control mt-2" name="sn" placeholder="{{ t('*surname/surnames', 0) }}">
+        </div>
+      </div>
+      <div class="text-center my-4">
+        <button type="submit" class="btn btn-outline-primary btn-lg">{{ t('*validate/delete', 0) }}</button>
+      </div>
+    </div>
+
+    <div class="col-4 flex-column">
+      <div>
+        <span>{{ t('*relationship computing mode', 0) }}:</span>
+        <div class="ml-2 mt-1">
+          <div class="custom-control custom-radio" id="rel_shortest_path">
+            <input type="radio" class="custom-control-input" id="etS" name="et" value="S" checked>
+            <label class="custom-control-label" for="etS">{{ t('*shortest path', 0) }}</label>
+          </div>
+          <div class="custom-control custom-radio" id="rel_ancestors">
+            <input type="radio" class="custom-control-input" id="etA" name="et" value="A">
+            <label class="custom-control-label" for="etA">{{ t('*relationship by ancestors', 0) }}</label>
+          </div>
+          <div class="custom-control custom-radio" id="rel_by_marriage">
+            <input type="radio" class="custom-control-input" id="etM" name="et" value="M">
+            <label class="custom-control-label" for="etM">{{ t('*relationship by marriage', 0) }}</label>
+          </div>
+        </div>
+      </div>
+      <div class="mt-2">
+        <span>{{ t('*relationship display options', 0) }}:</span>
+          <div class="ml-2 mt-1">
+            <div class="custom-control custom-checkbox">
+              <input type=checkbox class="custom-control-input" id="long" name="long">
+              <label class="custom-control-label" for="long">{{ t('*long display', 0) }}</label>
+            </div>
+            <div class="custom-control custom-checkbox">
+              <input type=checkbox class="custom-control-input" id="spouse" name="sp" value="1">
+              <label class="custom-control-label" for="spouse">{{ t('*visualize/show/hide/summary', 2) }} {{ t('spouse/spouses', 0) }}</label>
+            </div>
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="image" name="im" value="0">
+              <label class="custom-control-label" for="image">{{ t('*visualize/show/hide/summary', 2) }} {{ t('image/images', 1) }} <span class="text-info">✘</span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% include 'trl.html.j2' %}
+{% include 'copyr.html.j2' %}
+
+</div>
+
+<script>
+<!--
+  function enable(id) {
+    var inputs = document.getElementById(id).getElementsByTagName('input');
+    for (i=0; i<inputs.length; i++) {
+      inputs[i].disabled = '';
+    }
+  }
+  function disable(id) {
+    var inputs = document.getElementById(id).getElementsByTagName('input');
+    for (i=0; i<inputs.length; i++) {
+      if (inputs[i].name != "select") {
+        inputs[i].disabled = 'disabled';
+      }
+    }
+  }
+  function main() {
+    {# recherche individu #}
+    if (radio_R.checked == true) {
+      disable("rel_form_shortcut");
+      enable("rel_form_search");
+    }
+    else {
+      disable("rel_form_search");
+      enable("rel_form_shortcut");
+    }
+  }
+-->
+</script>
+
+{% include 'js.html.j2' %}
+
+{{ query_time | safe }}
+
+</body>
+</html>
