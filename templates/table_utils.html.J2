@@ -1,0 +1,241 @@
+{# --------------------------------------------------------------------
+  Table utils macros for genealogy tables
+  Includes column removal links and responsive headers
+  -------------------------------------------------------------------- #}
+
+{# Remove column macro #}
+{% macro rm(ccc, ttt) -%}
+  {% if e[ccc] == "on" %}<a role="button" class="stretched-link" href="{{ url_set(ccc) }}"
+    title="{% if ttt %}{{ ttt }}&#010;&#010;{% endif %}{{ t('*remove %s column', 0, ccc) }}"></a>{% endif %}
+{%- endmacro %}
+
+{# Remove 3 columns macro #}
+{% macro rm3(ccc, ddd, eee) -%}
+  {% if e[ccc] == "on" and e[ddd] == "on" %}<a role="button" class="stretched-link"
+    href="{{ url_set(ccc ~ '/' ~ ddd ~ ('/' ~ eee if eee else '')) }}"
+    title="{% if not eee %}{{ t('*remove %s column', 0, ccc ~ '+' ~ ddd) }}{% else %}{{ t('*remove %s column', 0, ccc ~ '+' ~ ddd ~ '+' ~ eee) }}{% endif %}"></a>{% endif %}
+{%- endmacro %}
+
+{# Table header macro #}
+{% macro table_header() -%}
+  <thead><tr class="align-middle">
+    {% do reset_count() %}
+    {% if e.num == "on" %}
+      <th scope="col" class="text-center align-middle position-relative" rowspan="2">№
+        {{ rm('num', t("*d'Aboville", 0) if e.m == 'D' else (t('Sosa number', 0) if e.m == 'A' else '')) }}</th>
+      {% do incr_count() %}
+    {% endif %}
+    <th scope="col" class="pl-2 align-middle no-hover" rowspan="2">{{ t('*person/persons', 0) }}</th>
+    {% do incr_count() %}
+    {% if e.birth == "on" and e.birth_place == "on" %}
+      <th class="text-center position-relative" colspan="2">{{ t('*birth', 0) }}
+        {{ rm3('birth', 'birth_place', '') }}</th>
+      {% do incr_count() %}{% do incr_count() %}
+    {% elif e.birth == "on" and e.birth_place != "on" %}
+      <th scope="col" class="text-center align-middle position-relative" rowspan="2">{{ t('*date of birth', 0) }}
+        {{ rm('birth', '') }}</th>
+      {% do incr_count() %}
+    {% elif e.birth != "on" and e.birth_place == "on" %}
+      <th scope="col" class="text-center align-middle position-relative" rowspan="2">{{ t('*birth place', 0) }}
+        {{ rm('birth_place', '') }}</th>
+      {% do incr_count() %}
+    {% endif %}
+    {% if e.baptism == "on" and e.baptism_place == "on" %}
+      <th class="text-center position-relative" colspan="2">{{ t('*baptism', 0) }}
+        {{ rm3('baptism', 'baptism_place', '') }}</th>
+      {% do incr_count() %}{% do incr_count() %}
+    {% elif e.baptism == "on" and e.baptism_place != "on" %}
+      <th scope="row" class="text-center align-middle position-relative" rowspan="2">{{ t('*date of baptism', 0) }}
+        {{ rm('baptism', '') }}</th>
+      {% do incr_count() %}
+    {% elif e.baptism != "on" and e.baptism_place == "on" %}
+      <th scope="row" class="text-center align-middle position-relative" rowspan="2">{{ t('*baptism place', 0) }}
+        {{ rm('baptism_place', '') }}</th>
+      {% do incr_count() %}
+    {% endif %}
+    {% if e.marr == "on" and (e.m == "A" or (e.m == "D" and e.t == "H")) %}
+      <th scope="col" class="pl-2 align-middle position-relative" rowspan="2">{{ t('*spouse/spouses', 1) }}
+        {{ rm('marr', '') }}</th>
+      {% do incr_count() %}
+    {% endif %}
+    {% if (e.marr_date == "on" and e.marr_place == "on") or
+         (e.marr_date == "on" and e.child == "on") or (e.marr_place == "on" and e.child == "on") %}
+      <th class="text-center position-relative"
+        colspan="{% if e.marr_date == 'on' and e.marr_place == 'on' and e.child == 'on' %}3{% else %}2{% endif %}">
+        {{ t('*marriage/marriages', 0) }}
+        {{ rm3('marr_date', 'marr_place', 'child') }}
+      </th>
+      {% if e.marr_date == "on" and e.marr_place == "on" and e.child == "on" %}{% do incr_count() %}{% endif %}
+      {% do incr_count() %}{% do incr_count() %}
+    {% elif e.marr_date == "on" and e.marr_place != "on" and e.child != "on" %}
+      <th scope="col" class="text-center align-middle position-relative" rowspan="2">{{ t('*date of marriage', 0) }}
+        {{ rm('marr_date', '') }}</th>
+      {% do incr_count() %}
+    {% elif e.marr_date != "on" and e.marr_place == "on" and e.child != "on" %}
+      <th scope="col" class="text-center align-middle text-middle position-relative" rowspan="2">{{ t('*marriage place', 0) }}
+        {{ rm('marr_place', '') }}</th>
+      {% do incr_count() %}
+    {% elif e.marr_date != "on" and e.marr_place != "on" and e.child == "on" %}
+      <th scope="col" class="text-center align-middel position-relative" rowspan="2">
+        <i class="fa fa-child"></i>
+        {{ rm('child', t('*nb children', 0) ~ '/' ~ t('nb children', 0) ~ ' ' ~ t('total', 0)) }}</th>
+      {% do incr_count() %}
+    {% endif %}
+    {% if e.death == "on" and e.death_place == "on" %}
+      <th class="text-center position-relative" colspan="2">{{ t('*death', 0) }}
+        {{ rm3('death', 'death_place', '') }}</th>
+      {% do incr_count() %}{% do incr_count() %}
+    {% elif e.death == "on" and e.death_place != "on" %}
+      <th scope="col" class="text-center position-relative" rowspan="2">{{ t('*date of death', 0) }}
+        {{ rm('death', '') }}</th>
+      {% do incr_count() %}
+    {% elif e.death != "on" and e.death_place == "on" %}
+      <th scope="col" class="text-center position-relative" rowspan="2">{{ t('*death place', 0) }}
+        {{ rm('death_place', '') }}</th>
+      {% do incr_count() %}
+    {% endif %}
+    {% if e.burial == "on" and e.burial_place == "on" %}
+      <th class="text-center position-relative" colspan="2">{{ t('*burial', 0) }}
+        {{ rm3('burial', 'burial_place', '') }}</th>
+      {% do incr_count() %}{% do incr_count() %}
+    {% elif e.burial == "on" and e.burial_place != "on" %}
+      <th scope="col" class="text-center position-relative" rowspan="2">{{ t('*date of burial', 0) }}
+        {{ rm('burial', '') }}</th>
+      {% do incr_count() %}
+    {% elif e.burial != "on" and e.burial_place == "on" %}
+      <th scope="col" class="text-center position-relative" rowspan="2">{{ t('*burial place', 0) }}
+        {{ rm('burial_place', '') }}</th>
+      {% do incr_count() %}
+    {% endif %}
+    {% if e.age == "on" %}
+      <th scope="col" class="align-middle text-center position-relative" rowspan="2">{{ t('*age', 0) }}
+        {{ rm('age', '') }}</th>
+      {% do incr_count() %}
+    {% endif %}
+    {% if e.occu == "on" %}
+      <th scope="col" class="pl-2 align-middle position-relative" rowspan="2">{{ t('*occupation/occupations', 1) }}
+        {{ rm('occu', '') }}</th>
+      {% do incr_count() %}
+    {% endif %}
+    </tr>
+    <tr>
+    {% if e.birth == "on" and e.birth_place == "on" %}
+      <th class="text-right pr-2 position-relative">{{ t('*date/dates', 0) }}
+        {{ rm('birth', t('*date of birth', 0)) }}</th>
+      <th class="pl-2 position-relative">{{ t('*place/places', 0) }}
+        {{ rm('birth_place', t('*birth place', 0)) }}</th>
+    {% endif %}
+    {% if e.baptism == "on" and e.baptism_place == "on" %}
+      <th class="text-right pr-2 position-relative" title="{{ t('*date of baptism', 0) }}">{{ t('*date/dates', 0) }}
+        {{ rm('baptism', t('*date of baptism', 0)) }}</th>
+      <th class="pl-2 position-relative">{{ t('*place/places', 0) }}
+        {{ rm('baptism_place', t('*baptism place', 0)) }}</th>
+    {% endif %}
+    {% if (e.marr_date == "on" and e.marr_place == "on") or
+         (e.marr_date == "on" and e.child == "on") or (e.marr_place == "on" and e.child == "on") %}
+      {% if e.marr_date == "on" %}
+        <th class="{% if e.marr_place != 'on' %}text-center{% else %}text-right pr-2{% endif %} position-relative">
+          {{ t('*date/dates', 0) }} {{ rm('marr_date', t('*date of marriage', 0)) }}</th>
+      {% endif %}
+      {% if e.marr_place == "on" %}
+        <th class="{% if e.marr_date != 'on' %}text-center{% else %}pl-2{% endif %} position-relative">
+          {{ t('*place/places', 0) }} {{ rm('marr_place', t('*marriage place', 0)) }}</th>
+      {% endif %}
+      {% if e.child == "on" %}
+        <th class="text-center px-2 position-relative">
+          <i class="fa fa-child"></i>
+          {{ rm('child', t('*nb children', 0) ~ '/' ~ t('nb children', 0) ~ ' ' ~ t('total', 0)) }}</th>
+      {% endif %}
+    {% endif %}
+    {% if e.death == "on" and e.death_place == "on" %}
+      <th class="text-right pr-2 position-relative">{{ t('*date/dates', 0) }}
+        {{ rm('death', t('*date of death', 0)) }}</th>
+      <th class="pl-2 position-relative">{{ t('*place/places', 0) }}
+        {{ rm('death_place', t('*death place', 0)) }}</th>
+    {% endif %}
+    {% if e.burial == "on" and e.burial_place == "on" %}
+      <th class="text-right pr-2 position-relative">{{ t('*date/dates', 0) }}
+        {{ rm('burial', t('*date of burial', 0)) }}</th>
+      <th class="pl-2 position-relative">{{ t('*place/places', 0) }}
+        {{ rm('burial_place', t('*burial place', 0)) }}</th>
+    {% endif %}
+  </tr></thead>
+{%- endmacro %}
+
+{# Popover parameters #}
+{% macro popover_params(xxx) -%}
+  data-toggle="popover" data-selector="true"{% if xxx %} data-placement="{{ xxx }}"{% endif %} 
+{%- endmacro %}
+
+{# Date popup macro #}
+{% macro date_popup(xxx, yyy, fff) -%}
+  {% set xxx_type = 'ancestor' if e.m == 'A' else ('self' if e.m == 'D' else xxx) %}
+  {% set symb = '°' if yyy == 'birth' else ('†' if yyy == 'death' and xxx.is_dead else '') %}
+  {% if e[yyy] == "on" and (xxx_type == "ancestor" or (xxx_type != "ancestor" and fff == 1)) %}
+    <td 
+      {% if (xxx_type == "ancestor" or (xxx_type != "ancestor" and e.t == "H")) and xxx.nb_families > 1 and (e.marr == "on" or e.marr_date == "on" or e.marr_place == "on" or e.child == "on") %}rowspan="{{ xxx.nb_families }}" {% endif %}
+      class="align-middle text-right{% if not cancel_links %} table_big_cell{% endif %}
+        {% if e.hl == 1 %}
+          {% if (not xxx['has_' ~ yyy ~ '_date'] or xxx[yyy ~ '_date'].month == "" or xxx[yyy ~ '_date'].day == "" or xxx[yyy ~ '_date'].prec != "") 
+            and (yyy == "birth" or (xxx.is_dead and yyy == "death")) %} bg-ly-incomplete
+          {% elif not xxx.is_dead and yyy == "death" %} bg-lg{% endif %}
+        {% endif %}">
+      {% if wizard and not cancel_links %}
+        <a class="d-block table_big_anchor" href="{{ prefix }}m=MOD_IND&i={{ xxx.index }}#{{ yyy }}"
+          title="{% if xxx['has_' ~ yyy ~ '_date'] %}{{ t('*update::', 0, yyy) }}{% else %}{{ t('*add::', 0, yyy) }}{% endif %}&#010;
+           {{ xxx.first_name }} {{ xxx.surname }} {% if xxx.occ > 0 %}({{ xxx.occ }}){% endif %}&#010;
+           {% if xxx['has_' ~ yyy ~ '_date'] and (xxx[yyy ~ '_date'].prec == "" or xxx[yyy ~ '_date'].prec == "?") %}{{ symb }} {{ xxx[yyy ~ '_date'] }}{% endif %}">
+        {% if xxx['has_' ~ yyy ~ '_date'] %}{{ xxx['slash_' ~ yyy ~ '_date'] }}{% else %}{{ symb }}{% endif %}</a>
+      {% else %}
+        {% if xxx['has_' ~ yyy ~ '_date'] %}{{ xxx['slash_' ~ yyy ~ '_date'] }}{% elif not cancel_links %}{{ symb }}{% endif %}
+      {% endif %}
+    </td>
+  {% endif %}
+{%- endmacro %}
+
+{# Place title macro #}
+{% macro place_title(xxx, yyy, mmm) -%}
+   {{ a_of_b(
+     (t('*note/notes', 1) if mmm == 1 else t('note/notes', 1)) if xxx['has_' ~ yyy ~ '_note'] else '' ~
+     ((' ' ~ t('and', 0) ~ ' ' ~ t('source/sources', 1)) if xxx['has_' ~ yyy ~ '_source'] else '') if xxx['has_' ~ yyy ~ '_note'] else
+     ((t('*source/sources', 1) if mmm == 1 else t('source/sources', 1)) if xxx['has_' ~ yyy ~ '_source'] else ''),
+     t(yyy, 0)
+   ) }}
+{%- endmacro %}
+
+{# Place popup macro #}
+{% macro place_popup(xxx, yyy, fff) -%}
+  {% if e[yyy ~ '_place'] == "on" and (xxx == "ancestor" or (xxx != "ancestor" and fff == 1)) %}
+    <td 
+      {% if (xxx == "ancestor" or (xxx != "ancestor" and e.t == "H" and nb_families > 1)) and xxx.nb_families > 1 and (e.marr == "on" or e.marr_date == "on" or e.marr_place == "on" or e.child == "on") %}rowspan="{{ xxx.nb_families }}" {% endif %}
+      class="align-middle
+        {% if e.ns == 1 %}
+          {% if xxx['has_' ~ yyy ~ '_note'] %} note{% if xxx['has_' ~ yyy ~ '_source'] %}source{% endif %}{% elif xxx['has_' ~ yyy ~ '_source'] %} source{% endif %}
+        {% endif %}
+        {% if e.hl == 1 %}
+          {% if not xxx['has_' ~ yyy ~ '_place'] and (yyy == "birth" or (xxx.is_dead and yyy == "death")) %} bg-ly-incomplete
+          {% elif not xxx.is_dead and yyy == "death" %} bg-lg{% endif %}
+        {% endif %}"
+        {% if e.ns == 1 or e[yyy] == "on" %}title="{{ t('*click', 0) }} {% endif %}
+               {% if e.ns == 1 and (xxx['has_' ~ yyy ~ '_source'] or xxx['has_' ~ yyy ~ '_note']) %}
+                 {{ t('notes sources show help', 0) }} 
+                 {% if xxx['has_' ~ yyy ~ '_note'] or xxx['has_' ~ yyy ~ '_source'] %}
+                   {{ place_title(xxx, yyy, 0) }}
+                 {% endif %}
+                 {% if e[yyy] == "on" and wizard %}&#010;{{ t('or', 0) }} {% endif %}
+               {% endif %}
+               {% if e[yyy] == "on" and wizard %}{{ t('notes sources edit on date', 0) }}{% endif %}
+        {% if e.ns == 1 or e[yyy] == "on" %}"{% endif %}
+        {% if e.ns == 1 and (xxx['has_' ~ yyy ~ '_note'] or xxx['has_' ~ yyy ~ '_source']) %} tabindex="0"
+          {{ popover_params('bottom') }}
+          data-content='{% if xxx['has_' ~ yyy ~ '_note'] %}{{ clean_comment_tags(capitalize(xxx[yyy ~ '_note'])) }}{% endif %}
+                        {% if xxx['has_' ~ yyy ~ '_source'] %}
+                          {% if xxx['has_' ~ yyy ~ '_note'] %}<hr>{% endif %}
+                          {{ clean_comment_tags(capitalize(xxx[yyy ~ '_source'])) }}
+                        {% endif %}'
+          data-title="{{ place_title(xxx, yyy, 1) }}"
+        {% endif %}>
+      {% if xxx['has_' ~ yyy ~ '_place'] %}{{ xxx[yyy ~ '_place'] }}{% endif %}
+    </td>
+  {% endif %}
+{%- endmacro %}

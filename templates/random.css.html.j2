@@ -1,0 +1,109 @@
+{# --------------------------------------------------------------------
+  Ported from: random_css.txt v1.10 2007-01-19 01:53:16
+  Copyright (c) 2006-2017 INRIA
+  
+  Random CSS generator using HSV color conversion
+  Generates randomized styles for GeneWeb interface
+  -------------------------------------------------------------------- #}
+
+{# Bright pastel color generator #}
+{% macro bright_pastel_color() -%}
+  {% set h = random_255() %}
+  {% set s = random_64() %}
+  {% set v = 192 + random_64() %}
+  rgb({{ red_of_hsv(h, s, v) }},{{ green_of_hsv(h, s, v) }},{{ blue_of_hsv(h, s, v) }})
+{%- endmacro %}
+
+{# Dark color generator #}
+{% macro dark_col() -%}
+  {% set h = random_255() %}
+  {% set s = 255 %}
+  {% set v = 160 %}
+  rgb({{ red_of_hsv(h, s, v) }},{{ green_of_hsv(h, s, v) }},{{ blue_of_hsv(h, s, v) }})
+{%- endmacro %}
+
+{# Initialize random seed and generate base colors #}
+{% do random_init() %}
+{% set h = random_255() %}
+{% set s = random_128() %}
+{% set v = 160 + random_96() %}
+{% set bg = 'rgb(' ~ red_of_hsv(h, s, v) ~ ',' ~ green_of_hsv(h, s, v) ~ ',' ~ blue_of_hsv(h, s, v) ~ ')' %}
+{% set h = h - 40 + random_80() %}
+{% set v = v + 10 + random_20() %}
+{% set bg2 = 'rgb(' ~ red_of_hsv(h, s, v) ~ ',' ~ green_of_hsv(h, s, v) ~ ',' ~ blue_of_hsv(h, s, v) ~ ')' %}
+
+#user-info { float: {{ right }}; padding: 10px }
+
+{% set fs = random_3() %}
+{% set ph = random_3() %}
+{% set pv = random_3() %}
+
+#title { text-align: 
+           {% if ph == 0 %}{{ left }}{% elif ph == 1 %}{{ right }}{% else %}center{% endif %}; 
+         vertical-align: 
+           {% if ph != 1 and pv == 0 %}top
+           {% elif pv == 1 %}bottom
+           {% else %}middle{% endif %} }
+
+#title { 
+  font-family: 
+    {% set f = random_8() %}
+    {% if f == 0 %}Times New Roman, serif
+    {% elif f == 1 %}Trebuchet MS, sans-serif
+    {% elif f == 2 %}Arial, Helvetica, sans-serif
+    {% elif f == 3 %}Verdana, Arial, Helvetica, sans-serif
+    {% elif f == 4 %}Courier New, Courier, monospace
+    {% elif f == 5 %}Georgia, serif
+    {% elif f == 6 %}Tahoma, sans-serif
+    {% elif f == 7 %}Palatino, serif
+    {% endif %}; 
+  font-style: {% if random_4() == 0 %}italic{% else %}normal{% endif %} }
+
+#title { 
+  font-variant: {% if random_5() == 0 %}small-caps{% else %}normal{% endif %}; 
+  font-transform: {% if random_10() == 0 %}uppercase{% else %}none{% endif %}; 
+  font-weight: {% if random_3() == 0 %}bold{% else %}normal{% endif %} }
+
+#title { color: {{ dark_col() }}; font-size: {{ 80 + random_80() }}% }
+
+body { margin: 0; background: {{ bg2 }}; color: {{ dark_col() }} }
+
+:link { color: {{ dark_col() }} } :visited { color: {{ dark_col() }} }
+
+body { 
+  font-family: 
+    {% set f = random_8() %}
+    {% if f == 0 %}Times New Roman, serif
+    {% elif f == 1 %}Trebuchet MS, sans-serif
+    {% elif f == 2 %}Arial, Helvetica, sans-serif
+    {% elif f == 3 %}Verdana, Arial, Helvetica, sans-serif
+    {% elif f == 4 %}Courier New, Courier, monospace
+    {% elif f == 5 %}Georgia, serif
+    {% elif f == 6 %}Tahoma, sans-serif
+    {% elif f == 7 %}Palatino, serif
+    {% endif %} }
+
+{% set pos1 = left if random_2() == 0 else right %}
+{% set pos2 = left if random_2() == 0 else right %}
+{% set sz = 100 if random_2() == 0 else 70 %}
+
+#lang .title { display: none }
+
+#lang { width: 12%; float: {{ pos1 }}; text-align: {{ pos2 }}; background: {{ bg }}; }
+
+#lang { padding: 30px 10px 10% 10px }
+
+#lang a { display: block; font-size: {{ sz }}% }
+
+#lang a { text-decoration: none }
+
+#lang a:hover { text-decoration: underline }
+
+#lang .item img { display: none }
+
+#content { margin-{{ pos1 }}: 12%; width: auto; 
+           font-size: {{ 90 + random_30() }}% }
+
+#content .subtitle { text-align: center }
+
+/* end random_css */

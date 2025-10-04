@@ -1,0 +1,90 @@
+{# --------------------------------------------------------------------
+  Ported from: stats.txt v7.1 27/10/2023 03:33:17
+  Copyright (c) 1998-2007 INRIA
+  
+  Statistics page showing latest events and population data
+  -------------------------------------------------------------------- #}
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+
+<head>
+  <!-- $Id: stats.txt v7.1 27/10/2023 03:33:17 $ -->
+  <!-- Copyright (c) 1998-2007 INRIA -->
+  <title>{{ t('*statistics', 0) }}</title>
+  <meta name="robots" content="none">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="shortcut icon" href="{{ images_prefix }}favicon_gwd.png">
+
+{% include 'css.html.j2' %}
+
+</head>
+
+<body{{ body_prop | safe }}>
+
+{% include 'hed.html.j2' %}
+
+{{ message_to_wizard | safe }}
+
+<div class="container">
+
+{# {% include 'menubar.html.j2' %} not complete #}
+
+{% include 'home.html.j2' %}
+
+<h1>{{ t('*statistics', 0) }}</h1>
+
+{% macro births(nnn) -%}
+  {{ t('the latest %d births', 0, nnn) }}
+{%- endmacro %}
+
+{% macro deaths(nnn) -%}
+  {{ t('the latest %t deaths', 0, nnn) }}
+{%- endmacro %}
+
+{% macro marriages(nnn) -%}
+  {{ t('the latest %d marriages', 0, nnn) }}
+{%- endmacro %}
+
+{% macro engaged(nnn) -%}
+  {{ t('the %d oldest couples perhaps still alive and engaged', 0, nnn) }}
+{%- endmacro %}
+
+{% macro alive(nnn) -%}
+  {{ t('the %d oldest perhaps still alive', 0, nnn) }}
+{%- endmacro %}
+
+{% macro lived(nnn) -%}
+  {{ t('the %d who lived the longest', 0, nnn) }}
+{%- endmacro %}
+
+{% set n = bvar.latest_event if bvar.latest_event else 20 %}
+
+<ul>
+{% if wizard or friend %}
+  <li><a href="{{ prefix }}m=LB&k={{ n }}">{{ births(n) }}</a></li>
+  <li><a href="{{ prefix }}m=LD&k={{ n }}">{{ deaths(n) }}</a></li>
+  <li><a href="{{ prefix }}m=LM&k={{ n }}">{{ marriages(n) }}</a></li>
+  <li><a href="{{ prefix }}m=OE&k={{ n }}">{{ engaged(n) }}</a></li>
+  <li><a href="{{ prefix }}m=OA&k={{ n }}&lim=0">{{ alive(n) }}</a></li>
+{% endif %}
+<li><a href="{{ prefix }}m=LL&k={{ n }}">{{ lived(n) }}</a></li>
+</ul>
+
+{% if wizard or friend %}
+  <ul>
+    <li><a href="{{ prefix }}m=POP_PYR">{{ t('population pyramid', 0) }}</a></li>
+  </ul>
+{% endif %}
+
+{% include 'trl.html.j2' %}
+{% include 'copyr.html.j2' %}
+
+{{ query_time | safe }}
+
+</div>
+
+{% include 'js.html.j2' %}
+
+</body>
+</html>
