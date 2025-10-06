@@ -1,0 +1,69 @@
+{#
+  Template: family.jinja
+  Purpose: Render the family page (modules/arbre_famille) with global chrome.
+
+  Variables required (family.txt):
+  - bvar.default_lang    : default UI language from base configuration. [web:2]
+  - evar.lang            : current language selection (query/env). [web:2]
+  - has_public_name      : boolean, whether person has a public name. [web:2]
+  - has_qualifiers       : boolean, whether person has qualifiers. [web:2]
+  - public_name          : string, person’s public name. [web:2]
+  - first_name           : string, person’s first name. [web:2]
+  - surname              : string, person’s surname. [web:2]
+  - qualifier            : string, qualifier suffix (e.g., Jr.). [web:2]
+  - images_prefix        : path prefix for static images. [web:2]
+  - body_prop            : extra attributes injected on <body>. [web:2]
+  - evar.wide            : "on" for fluid container layout. [web:2]
+  - message_to_wizard    : optional wizard/admin message HTML. [web:2]
+  - cancel_links         : boolean, if true hide trl/copyr/query_time. [web:2]
+  - query_time           : render backend query timing. [web:2]
+
+  Includes required:
+  - css.jinja
+  - hed.jinja
+  - perso_utils.jinja
+  - menubar.jinja
+  - modules/arbre_famille.jinja
+  - trl.jinja
+  - copyr.jinja
+  - js.jinja
+#}
+
+<!DOCTYPE html>
+<html lang="{% if bvar.default_lang and not evar.lang %}{{ bvar.default_lang }}{% elif evar.lang %}{{ evar.lang }}{% else %}en{% endif %}">
+<head>
+  <title>
+    {% if has_public_name %}
+      {% if has_qualifiers %}{{ public_name }} {{ qualifier }}
+      {% else %}{{ public_name }} {{ surname }}{% endif %}
+    {% else %}
+      {% if has_qualifiers %}{{ first_name }} {{ qualifier }}
+      {% else %}{{ first_name }} {{ surname }}{% endif %}
+    {% endif %}
+  </title>
+  <meta name="robots" content="none">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="shortcut icon" href="{{ images_prefix }}favicon_gwd.png">
+  <link rel="apple-touch-icon" href="{{ images_prefix }}favicon_gwd.png">
+  {% include 'css.jinja' %}
+</head>
+<body{{ body_prop }}>
+  {% include 'hed.jinja' %}
+  {% include 'perso_utils.jinja' %}
+  <a href="#content" class="sr-only sr-only-focusable">Skip navigation menu</a>
+  <div class="container{% if evar.wide == 'on' %}-fluid{% endif %}">
+    {% include 'menubar.jinja' %}
+    {{ message_to_wizard }}
+    <div id="content" tabindex="-1">
+      {% include 'modules/arbre_famille.jinja' %}
+    </div>
+    {% if not cancel_links %}
+      {% include 'trl.jinja' %}
+      {% include 'copyr.jinja' %}
+      {{ query_time }}
+    {% endif %}
+  </div>
+  {% include 'js.jinja' %}
+</body>
+</html>
