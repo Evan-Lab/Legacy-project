@@ -1,1 +1,1 @@
-from . import home, welcome  # noqa: F401
+from . import home, welcome, index  # noqa: F401
