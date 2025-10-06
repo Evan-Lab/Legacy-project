@@ -6,7 +6,7 @@ authors = [
     {name = "RedCommand",email = "senard.maxime@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.12"
 dependencies = [
     "uvicorn (>=0.37.0,<0.38.0)",
     "fastapi[standard] (>=0.117.1,<0.118.0)",
