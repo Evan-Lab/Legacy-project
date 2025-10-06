@@ -20,4 +20,9 @@ class BaseService:
             raise NotFoundError(f"Base with name {base} not found")
         return db_base
 
+def get_bases_service(session: SessionDep) -> BaseService:
+    return BaseService(session)
+
 BaseDep = Annotated[Base, Depends(BaseService.default)]
+
+BasesDep = Annotated[BaseService, Depends(get_bases_service)]
