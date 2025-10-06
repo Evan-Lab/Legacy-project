@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from src.database import init_db
-
 from src import (
     app,
+    startup, # noqa: F401
+    static, # noqa: F401
     view,  # noqa: F401
     api,  # noqa: F401
 )

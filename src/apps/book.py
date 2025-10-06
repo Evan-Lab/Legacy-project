@@ -4,6 +4,7 @@ from fastapi.params import Depends
 from sqlmodel import Session
 
 from src.database import SessionDep
+from src.dto.first_name import AlphabeticalFirstNameDto
 from src.dto.welcome import WelcomeDto
 from src.models.models import Base
 from src.service.base import BaseDep
@@ -19,14 +20,14 @@ class BookApp:
     def individuals_count(self) -> int:
         return self.book_service.individuals_count()
 
-    def welcome(self):
+    def welcome(self) -> WelcomeDto:
         count = self.individuals_count()
         return WelcomeDto(
             nb_persons=count,
             base=WelcomeDto.BaseDto(name=self.base.name, real_nb_persons=count, has_notes=True),
         )
 
-    def first_name_alphabetical(self):
+    def first_name_alphabetical(self) -> AlphabeticalFirstNameDto:
         return self.book_service.first_name_alphabetical()
 
 
