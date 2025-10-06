@@ -14,13 +14,9 @@ class BaseApp:
         self.base_service = base_service
 
     def index(self) -> IndexDto:
-        return IndexDto(
-            bases=[
-                IndexDto.BaseDto(slug="smith_family", label="Smith Family"),
-                IndexDto.BaseDto(slug="dupont_arbre", label="Dupont"),
-                IndexDto.BaseDto(slug="ivanov_tree", label="Ivanov"),
-            ]
-        )
+        bases = self.base_service.get_bases_list()
+
+        return IndexDto(bases=bases)
 
 
 def get_base_app(session: SessionDep, bases_service: BasesDep) -> BaseApp:
