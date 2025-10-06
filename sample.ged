@@ -1,0 +1,41 @@
+0 HEAD
+1 SOUR GeneWeb
+1 GEDC
+2 VERS 5.5
+2 FORM LINEAGE-LINKED
+1 CHAR UTF-8
+0 @I1@ INDI
+1 NAME Jean /Dupont/
+1 SEX M
+1 BIRT
+2 DATE 15 JAN 1950
+2 PLAC Paris, France
+0 @I2@ INDI
+1 NAME Marie /Martin/
+1 SEX F
+1 BIRT
+2 DATE 20 MAR 1955
+2 PLAC Lyon, France
+0 @I3@ INDI
+1 NAME Pierre /Dupont/
+1 SEX M
+1 BIRT
+2 DATE 10 JUL 1980
+2 PLAC Paris, France
+1 FAMC @F1@
+0 @I4@ INDI
+1 NAME Sophie /Dupont/
+1 SEX F
+1 BIRT
+2 DATE 5 DEC 1985
+2 PLAC Marseille, France
+1 FAMC @F1@
+0 @F1@ FAM
+1 HUSB @I1@
+1 WIFE @I2@
+1 CHIL @I3@
+1 CHIL @I4@
+1 MARR
+2 DATE 12 JUN 1978
+2 PLAC Paris, France
+0 TRLR

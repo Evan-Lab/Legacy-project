@@ -100,8 +100,8 @@ async def welcome(request: Request, book: BookAppDep) -> HTMLResponse:
         "lang": "fr",
         "default_lang": "en",
         "images_prefix": "/static/img/",
-        "prefix": "/gw?",
-        "action": "/gw",
+        "prefix": f"/{dto.base.name}/search?",
+        "action": f"/{dto.base.name}/search",
         "body_prop": "",
         "hidden": "",
         "roglo": False,
@@ -126,3 +126,18 @@ async def welcome(request: Request, book: BookAppDep) -> HTMLResponse:
         "query_time": ""
     }
     return templates.TemplateResponse("welcome.html.j2", ctx)
+
+
+@app.get("/{base}/search", response_class=HTMLResponse)
+async def search(request: Request, base: str, book: BookAppDep, pn: str = "", p: str = "", n: str = "") -> HTMLResponse:
+    # pn = fullname search, p = first name, n = surname
+    results = book.search(name=p if p else None, surname=n if n else None, fullname=pn if pn else None)
+
+    ctx = {
+        "request": request,
+        "base_name": base,
+        "query": {"pn": pn, "p": p, "n": n},
+        "results": results,
+        "total": len(results)
+    }
+    return templates.TemplateResponse("search_results.html.j2", ctx)

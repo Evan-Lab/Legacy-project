@@ -29,6 +29,9 @@ class BookApp:
     def first_name_alphabetical(self):
         return self.book_service.first_name_alphabetical()
 
+    def search(self, name: str | None = None, surname: str | None = None, fullname: str | None = None):
+        return self.book_service.search(name=name, surname=surname, fullname=fullname)
+
 
 def get_book_app(session: SessionDep, book_service: BookDep, base: BaseDep) -> BookApp:
     return BookApp(session, book_service, base)

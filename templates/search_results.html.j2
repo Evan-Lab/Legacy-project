@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Résultats de recherche - {{ base_name }}</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #3498db;
+            text-decoration: none;
+            background-color: white;
+            padding: 8px 15px;
+            border-radius: 3px;
+        }
+        .back-link:hover {
+            background-color: #ecf0f1;
+        }
+        .search-info {
+            background-color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        .results {
+            background-color: white;
+            border-radius: 5px;
+            padding: 20px;
+        }
+        .result-item {
+            padding: 15px;
+            border-bottom: 1px solid #ecf0f1;
+            display: flex;
+            align-items: center;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-item:hover {
+            background-color: #f8f9fa;
+        }
+        .person-icon {
+            width: 40px;
+            height: 40px;
+            background-color: #3498db;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+        .person-info {
+            flex: 1;
+        }
+        .person-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .person-details {
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+        .result-count {
+            color: #27ae60;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🔍 Résultats de recherche</h1>
+        <a href="/{{ base_name }}/welcome" class="back-link">← Retour à l'accueil</a>
+    </div>
+
+    <div class="search-info">
+        <strong>Critères de recherche :</strong>
+        {% if query.pn %}
+            <span>Recherche globale : "{{ query.pn }}"</span>
+        {% else %}
+            {% if query.p %}
+                <span>Prénom : "{{ query.p }}"</span>
+            {% endif %}
+            {% if query.n %}
+                <span>{% if query.p %} | {% endif %}Nom : "{{ query.n }}"</span>
+            {% endif %}
+        {% endif %}
+        <br>
+        <span class="result-count">{{ total }} résultat(s) trouvé(s)</span>
+    </div>
+
+    <div class="results">
+        {% if total > 0 %}
+            {% for person in results %}
+            <div class="result-item">
+                <div class="person-icon">{{ person.name[0]|upper if person.name else '?' }}</div>
+                <div class="person-info">
+                    <div class="person-name">
+                        {{ person.name|default('(prénom inconnu)') }} {{ person.surname|default('(nom inconnu)') }}
+                    </div>
+                    <div class="person-details">
+                        ID: {{ person.id }} | Base: {{ base_name }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-results">
+                <h2>😕 Aucun résultat trouvé</h2>
+                <p>Essayez avec d'autres critères de recherche.</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -1,0 +1,31 @@
+{# Converted from geneweb/distribution/gw/etc/moved.html #}
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <title>{{ bname }} -&gt; {{ b.moved }}</title>
+  <meta name="robots" content="none">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="shortcut icon" href="{{ images_prefix }}favicon_gwd.png">
+  {# {% include 'css.html.j2' %} #}
+  {# {% include 'js.html.j2' %} #}
+</head>
+<body>
+<div class="container">
+<h1>{{ bname }} -&gt; {{ b.moved }}</h1>
+<p>
+{{ interp(i18n_block({
+  'en': 'The database "' ~ bname ~ '" has moved to:',
+  'fr': 'La base de données "' ~ bname ~ '" se trouve maintenant à l\'adresse:'
+})) }}
+<dl><dt><dd>
+<a href="{{ b.moved }}">{{ b.moved }}</a>
+</dd></dt></dl>
+</p>
+
+{# {% include 'trl.html.j2' %} #}
+{# {% include 'copyr.html.j2' %} #}
+{{ query_time | default('') }}
+</div>
+</body>
+</html>

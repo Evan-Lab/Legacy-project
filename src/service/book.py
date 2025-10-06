@@ -29,6 +29,9 @@ class BookService:
             grouped[first_letter].append(FirstNameDto(name=individual.name or ""))
         return AlphabeticalFirstNameDto(total=total, **grouped)
 
+    def search(self, name: str | None = None, surname: str | None = None, fullname: str | None = None):
+        return self.individual_repo.search(name=name, surname=surname, fullname=fullname)
+
 
 def get_book_service(session: SessionDep, base: BaseDep) -> BookService:
     return BookService(session, base)

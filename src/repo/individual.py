@@ -21,3 +21,19 @@ class IndividualRepo:
     def count(self) -> int:
         statement = select(Individual).where(Individual.base_id == self.base.id)
         return len(self.session.exec(statement).all())
+
+    def search(self, name: str | None = None, surname: str | None = None, fullname: str | None = None) -> list[Individual]:
+        statement = select(Individual).where(Individual.base_id == self.base.id)
+
+        if fullname:
+            # Search in both name and surname
+            statement = statement.where(
+                (Individual.name.contains(fullname)) | (Individual.surname.contains(fullname))
+            )
+        else:
+            if name:
+                statement = statement.where(Individual.name.contains(name))
+            if surname:
+                statement = statement.where(Individual.surname.contains(surname))
+
+        return list(self.session.exec(statement).all())
