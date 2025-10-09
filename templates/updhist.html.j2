@@ -1,0 +1,217 @@
+{# --------------------------------------------------------------------
+  Ported from: updhist.txt v7.1 (24/6/2024 05:24:40)
+  Copyright (c) 1998-2007 INRIA
+  Notes:
+  - Legacy [* ... ] tokens are i18n lookups mapped via {{ t("...", idx) }}
+  - GeneWeb %variable; syntax converted to {{ variable }}
+  - %if;(...) converted to {% if ... %}
+  - %foreach; converted to {% for ... %}
+  -------------------------------------------------------------------- #}
+
+{# ------------------------- Macros / helpers ------------------------- #}
+
+{% set kk = e.k if e.k != "" else 3 %}
+{% set wiz = e.wiz if e.wiz != "" and e.n == "" else "" %}
+
+{# Define search_form macro #}
+{% macro search_form() %}
+  {% if wizard or friend %}
+    <form class="d-flex form-inline mb-2" method="get" action="{{ action }}">
+      {{ hidden|safe }}
+      <input type="hidden" name="m" value="HIST_SEARCH">
+      {% if e.m == "HIST_SEARCH" and found %}
+        <input type="hidden" name="pos" value="{% if found %}{{ pos }}{% else %}0{% endif %}">
+      {% endif %}
+      <input type="text" class="form-control col-4" placeholder="{{ t('*search/case sensitive', 0) }}"
+        name="s" maxlength="40" value="{{ e.s.ns }}">
+      <button type="submit" class="btn btn-outline-primary" title="{{ t('*search/case sensitive', 0) }}">OK</button>
+      <label class="my-1 ml-3 mr-2" for="rows">{{ t('*number of rows', 0) }}</label>
+      <input type="number" class="form-control" id="rows" title="{{ t('*number of rows', 0) }}"
+         name="k" value="{{ kk }}" min="0" max="150" step="10">
+      <div class="custom-control custom-checkbox ml-3">
+        <input type="checkbox" class="custom-control-input" name="c" value="on" id="case"
+          {% if "main" != "true" and e.c == "on" %} checked{% endif %}>
+        <label class="custom-control-label" for="case">{{ t('*search/case sensitive', 1) }}</label>
+      </div>
+    </form>
+  {% endif %}
+{% endmacro %}
+
+{# Define table macro #}
+{% macro table() %}
+  <table class="table table-sm table-hover px-1">
+    <thead class="thead-default">
+      <tr>
+        <th>{{ t('*date/dates', 0) }}</th>
+        <th>{{ t('*person/persons', 0) }}</th>
+        <th>{{ t('*wizard/wizards/friend/friends/exterior', 0) }}</th>
+        <th>{{ t('*update', 0) }}</th>
+        {% if bvar.history_diff == "yes" %}<th class="text-center"><i class="fa fa-clock-rotate-left fa-fw text-dark" title="{{ t('*history', 0) }}"></i></th>{% endif %}
+      </tr>
+    </thead>
+    {% for line in history_line(kk, e.pos, wiz) %}
+      <tr>
+        <td>{{ line.time }}</td>
+        <td>
+        {% if line.is_person %}
+          {% if line.person.is_private %}
+            <i class="fa fa-person text-danger"> </i>
+          {% elif line.person.is_semi_public %}
+            <i class="fa fa-person text-warning"> </i>
+          {% elif line.person.is_public or (b.public_if_titles == "yes" and line.person.has_titles) %}
+            <i class="fa fa-person text-success"> </i>
+          {% else %}
+            <i class="fa fa-person text-muted"> </i>
+          {% endif %}
+        {% else %}
+          &nbsp;&nbsp;
+        {% endif %}
+        {% if line.first_name != "" %}
+          <!--{{ line.first_name }}/{{ line.occ }}/{{ line.surname }}-->
+          <a href="{{ prefix }}{{ line.person.access }}">{{ line.person }}</a>, {{ line.person.title }}
+          {{ line.person.dates }}
+        {% elif line.is_note %}
+          - <a href="{{ prefix }}m=NOTES{% if line.note.page != "" %}f={{ line.note.page.v }}{% endif %}{% if line.note.part != "" %}v={{ line.note.part }}{% endif %}">
+          <i>{% if line.note.page == "" %}{{ t('*note/notes', 1) }}{% else %}[{{ line.note.page }}]{% endif %}
+          </i></a>
+          {% if line.note.part != "" %}- <span style="font-size:50%">#{{ line.note.part }}
+            </span>{% endif %}
+        {% else %}
+          {{ line.key }}
+        {% endif %}
+        </td>
+        <td>
+          {% if line.user != "" %}
+            <i>
+              {% if wiz == "" %}
+                <a href="{{ prefix }}m=HIST&k={{ kk }}&wiz={{ line.user.v }}">{{ line.user }}</a>
+              {% else %}
+                {{ line.user }}
+              {% endif %}
+            </i>
+          {% endif %}
+        </td>
+        <td>{{ update_text(line.update.var) }}</td>
+        {% if b.history_diff == "yes" %}
+          <td class="text-center">
+            {% if line.first_name != "" and line.person.has_history %}
+              <a href="{{ prefix }}m=HIST_DIFF&t=SUM&f={{ line.person.history_file }}">
+                <i class="fa fa-clock-rotate-left fa-fw" aria-hidden="true" title="{{ t('*visualize/show/hide/summary', 1) }} {{ t('*history', 0) }}"></i>
+                <span class="sr-only">{{ t('*history', 0) }}</span></a>
+            {% else %}
+              &nbsp;
+            {% endif %}
+          </td>
+        {% endif %}
+      </tr>
+    {% endfor %}
+  </table>
+{% endmacro %}
+
+{# changes in 2 letters labels may create backward incompatibility with old history files. #}
+{% macro update_text(uu) -%}
+  {% if uu == "aa" %}{{ t('add::parents', 0) }}
+  {% elif uu == "ap" %}{{ t('add::person/persons', 0) }}
+  {% elif uu == "af" %}{{ t('add::family/families', 0) }}
+  {% elif uu == "cb" %}{{ t('copy portrait to blason', 0) }}
+  {% elif uu == "cd" %}{{ t('copy image to blason', 0) }}
+  {% elif uu == "cn" %}{{ t("change children's names", 0) }}
+  {% elif uu == "db" %}{{ t('delete::coat of arms', 0) }}
+  {% elif uu == "dc" %}{{ t('delete::image/images', 0) }} {{ t('from carrousel', 0) }}
+  {% elif uu == "df" %}{{ t('delete::family/families', 0) }}
+  {% elif uu == "dp" %}{{ t('delete::person/persons', 0) }}
+  {% elif uu == "dq" %}{{ t('delete::portrait', 0) }}
+  {% elif uu == "d?" %}{{ t('delete::unknown', 0) }}
+  {% elif uu == "ff" %}{{ t('merge::family/families', 1) }}
+  {% elif uu == "fn" %}{{ t('modify::first name/first names', 0) }}
+  {% elif uu == "fp" %}{{ t('merge::person/persons', 1) }}
+  {% elif uu == "if" %}{{ t('invert::family/families', 1) }}
+  {% elif uu == "ma" %}{{ t('modify::alias/aliases', 0) }}
+  {% elif uu == "md" %}{{ t('modify::domain/domains', 0) }}
+  {% elif uu == "mf" %}{{ t('modify::family/families', 0) }}
+  {% elif uu == "mn" %}{{ t('modify::note/notes', 1) }}
+  {% elif uu == "mo" or uu == "co" %}{{ t('modify::occupation/occupations', 0) }}
+  {% elif uu == "mp" %}{{ t('modify::person/persons', 0) }}
+  {% elif uu == "mq" or uu == "cp" %}{{ t('modify::place/places', 0) }}
+  {% elif uu == "ms" or uu == "cs" %}{{ t('modify::source/sources', 0) }}
+  {% elif uu == "mt" %}{{ t('modify::title/titles', 0) }}
+  {% elif uu == "mu" %}{{ t('modify::public name', 0) }}
+  {% elif uu == "mx" %}{{ t('modify::qualifier/qualifiers', 0) }}
+  {% elif uu == "rb" %}{{ t('restore::coat of arms', 0) }}
+  {% elif uu == "rc" %}{{ t('restore::carrousel image', 0) }}
+  {% elif uu == "rp" %}{{ t('restore::portrait', 0) }}
+  {% elif uu == "sp" %}{{ t('send::portrait', 0) }}
+  {% elif uu == "sb" %}{{ t('send::coat of arms', 0) }}
+  {% elif uu == "s3" %}{{ t('send::image/images', 0) }} {{ t('note/notes', 0) }} {{ t('and', 0) }} {{ t('source/sources', 0) }} {{ t('to carrousel', 0) }}
+  {% elif uu == "sf" %}{{ t('send::image/images', 0) }} {{ t('to carrousel', 0) }}
+  {% elif uu == "sn" %}{{ t('modify::surname/surnames', 0) }}
+  {% elif uu == "so" %}{{ t('send::note/notes', 0) }} {{ t('to carrousel', 0) }}
+  {% elif uu == "ss" %}{{ t('send::source/sources', 0) }} {{ t('to carrousel', 0) }}
+  {% elif uu == "sx" %}{{ t('send::unknown', 0) }}
+  {% elif uu == "s?" %}{{ t('send::unknown', 0) }}
+  {% else %}{{ interp(uu) }}
+  {% endif %}
+{%- endmacro %}
+
+{# Define nav macro #}
+{% macro nav() %}
+  {% if pos != "" %}
+   <form class="form-inline" method="get" action="{{ action }}">
+     {{ hidden|safe }}
+     <input type="hidden" name="m" value="HIST">
+     <input type="hidden" name="k" value="{{ e.k }}">
+     <input type="hidden" name="pos" value="{{ pos }}">
+     <div class="input-group">
+       <button type="submit" class="btn btn-outline-primary ml-4" title="{{ t('*next', 0) }}"><i class="fa fa-forward fa-fw"></i></button>
+       {% if wiz != "" %}
+         <input type="hidden" name="wiz" value="{{ wiz }}">({{ t('*wizard/wizards/friend/friends/exterior', 0) }}: {{ wiz }})
+       {% endif %}
+     </div>
+   </form>
+  {% endif %}
+{% endmacro %}
+
+{# -------------------------------------------------------------------- #}
+{# Main HTML Document                                                   #}
+{# -------------------------------------------------------------------- #}
+
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+  <title>{{ t('*history of updates', 0) }}</title>
+  <meta name="robots" content="none">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="shortcut icon" href="{{ images_prefix }}favicon_gwd.png">
+  {# {% include 'css.html.j2' %} #}
+</head>
+<body{{ body_prop|safe }}>
+{# {% include 'hed.html.j2' %} #}
+{{ message_to_wizard|safe }}
+<div class="container">
+{# {% include 'home.html.j2' %} #}
+<h1>{{ t('*history of updates', 0) }}</h1>
+
+{% if not cancel_links and (e.m != "HIST_SEARCH" or not found) %}
+  <div class="d-flex justify-content-between mt-2 px-1">
+    <div class="order-1">{{ search_form() }}</div>
+    <div class="d-none order-3">{{ table() }}</div>
+    <div class="order-2">{{ nav() }}</div>
+  </div>
+{% endif %}
+{{ table() }}
+
+{% if e.m == "HIST_SEARCH" and found %}
+  <div class="d-flex justify-content-between px-1">
+    {{ search_form() }}
+    {{ nav() }}
+  </div>
+{% endif %}
+
+{# {% include 'trl.html.j2' %} #}
+{# {% include 'copyr.html.j2' %} #}
+</div>
+{# {% include 'js.html.j2' %} #}
+{{ query_time|default('') }}
+</body>
+</html>
