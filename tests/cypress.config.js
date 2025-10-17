@@ -6,5 +6,6 @@ module.exports = defineConfig({
       config.baseUrl = "http://localhost:2317";
       return config;
     },
+    specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
   },
 });
