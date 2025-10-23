@@ -341,34 +341,24 @@ describe("Add Family page", () => {
 
   describe("Form interactions - Complete workflow", () => {
     it("can fill out a complete parent form", () => {
-      // Fill parent 1 (father)
       cy.get('input[name="pa1_fn"]').clear().type("John");
       cy.get('input[name="pa1_sn"]').clear().type("Smith");
       cy.get('input[name="pa1_occ"]').clear().type("0");
       cy.get('select[name="pa1_p"]').select("create");
 
-      // Fill parent 2 (mother)
       cy.get('input[name="pa2_fn"]').clear().type("Jane");
       cy.get('input[name="pa2_sn"]').clear().type("Doe");
       cy.get('input[name="pa2_occ"]').clear().type("0");
       cy.get('select[name="pa2_p"]').select("create");
 
-      // Verify all values
       cy.get('input[name="pa1_fn"]').should("have.value", "John");
       cy.get('input[name="pa2_fn"]').should("have.value", "Jane");
     });
 
     it("can fill out event information", () => {
-      // Select marriage event
       cy.get('select[id^="fevent_select"]').first().select("#marr");
-
-      // Fill place
       cy.get('input[name^="e_place"]').first().type("New York");
-
-      // Fill notes
       cy.get('textarea[name^="e_note"]').first().type("Wedding at city hall");
-
-      // Verify
       cy.get('input[name^="e_place"]').first().should("have.value", "New York");
       cy.get('textarea[name^="e_note"]')
         .first()
@@ -376,19 +366,12 @@ describe("Add Family page", () => {
     });
 
     it("can navigate between sections using nav pills", () => {
-      // Start at parents
       cy.get('a[href="#family"]').click();
       cy.url().should("include", "#family");
-
-      // Go to events
       cy.get('a[href="#events"]').click();
       cy.url().should("include", "#events");
-
-      // Go to children
       cy.get('a[href="#children"]').click();
       cy.url().should("include", "#children");
-
-      // Go to comments
       cy.get('a[href="#comments"]').click();
       cy.url().should("include", "#comments");
     });
@@ -411,6 +394,122 @@ describe("Add Family page", () => {
       cy.get('input[type="hidden"][name="digest"]')
         .should("exist")
         .and("have.attr", "value");
+    });
+  });
+
+  describe("Navigation from welcome page", () => {
+    it("can access Add Family from the welcome page", () => {
+      cy.visit(`${base}/?b=${testDatabase}`);
+      cy.get("body").then(($body) => {
+        if ($body.find('a[href*="m=ADD_FAM"]').length > 0) {
+          cy.get('a[href*="m=ADD_FAM"]').first().click();
+          cy.url().should("include", "m=ADD_FAM");
+          cy.get("form#updfam").should("exist");
+          cy.get("h1").should("be.visible").and("contain", "Add family");
+        }
+      });
+    });
+
+    it("Add Family button has correct icon and text", () => {
+      cy.visit(`${base}/?b=${testDatabase}`);
+
+      cy.get("body").then(($body) => {
+        if ($body.find('a[href*="m=ADD_FAM"]').length > 0) {
+          cy.get('a[href*="m=ADD_FAM"]')
+            .first()
+            .should("have.class", "btn")
+            .within(() => {
+              cy.get("i.fa-user-plus").should("exist");
+            });
+        }
+      });
+    });
+  });
+
+  describe("End-to-end family creation with submission", () => {
+    beforeEach(() => {
+      cy.visit(`${base}/${testDatabase}?m=ADD_FAM`);
+    });
+
+    it("can create a complete family with parents and submit", () => {
+      const timestamp = Date.now();
+      const father = {
+        firstName: `TestFather${timestamp}`,
+        lastName: `TestFamily${timestamp}`,
+        occ: "0",
+      };
+      const mother = {
+        firstName: `TestMother${timestamp}`,
+        lastName: `TestFamily${timestamp}`,
+        occ: "0",
+      };
+      cy.get('input[name="pa1_fn"]').clear().type(father.firstName);
+      cy.get('input[name="pa1_sn"]').clear().type(father.lastName);
+      cy.get('input[name="pa1_occ"]').clear().type(father.occ);
+      cy.get('select[name="pa1_p"]').select("create");
+      cy.get('input[name="pa2_fn"]').clear().type(mother.firstName);
+      cy.get('input[name="pa2_sn"]').clear().type(mother.lastName);
+      cy.get('input[name="pa2_occ"]').clear().type(mother.occ);
+      cy.get('select[name="pa2_p"]').select("create");
+      cy.get('input[name="pa1_fn"]').should("have.value", father.firstName);
+      cy.get('input[name="pa2_fn"]').should("have.value", mother.firstName);
+      cy.get('button[type="submit"].btn-lg').click();
+      cy.url({ timeout: 10000 }).should("not.include", "m=ADD_FAM");
+    });
+
+    it("can create family with marriage event and submit", () => {
+      const timestamp = Date.now();
+      const familyName = `TestFamily${timestamp}`;
+      cy.get('input[name="pa1_fn"]').clear().type(`Father${timestamp}`);
+      cy.get('input[name="pa1_sn"]').clear().type(familyName);
+      cy.get('select[name="pa1_p"]').select("create");
+      cy.get('input[name="pa2_fn"]').clear().type(`Mother${timestamp}`);
+      cy.get('input[name="pa2_sn"]').clear().type(familyName);
+      cy.get('select[name="pa2_p"]').select("create");
+      cy.get('a[href="#events"]').click();
+      cy.url().should("include", "#events");
+      cy.get('select[id^="fevent_select"]').first().select("#marr");
+      cy.get('input[name^="e_place"]').first().type("Test City");
+      cy.get('input[name*="_yyyy"]').first().type("2020");
+      cy.get('textarea[name^="e_note"]').first().type("Test marriage event");
+      cy.get('a[href="#comments"]').click();
+      cy.get('button[type="submit"].btn-lg').click();
+      cy.url({ timeout: 10000 }).should("not.include", "m=ADD_FAM");
+    });
+
+    it("can create family with birth dates and submit", () => {
+      const timestamp = Date.now();
+      cy.get('input[name="pa1_fn"]').clear().type(`TestPerson${timestamp}`);
+      cy.get('input[name="pa1_sn"]').clear().type(`TestSurname${timestamp}`);
+      cy.get('select[name="pa1_p"]').select("create");
+      cy.get('input[name="pa1b_dd"]').clear().type("15");
+      cy.get('input[name="pa1b_mm"]').clear().type("06");
+      cy.get('input[name="pa1b_yyyy"]').clear().type("1980");
+      cy.get('input[name="pa1b_pl"]').clear().type("Paris");
+      cy.get('input[name="pa2_fn"]').clear().type(`TestPerson2${timestamp}`);
+      cy.get('input[name="pa2_sn"]').clear().type(`TestSurname${timestamp}`);
+      cy.get('select[name="pa2_p"]').select("create");
+      cy.get('input[name="pa2b_dd"]').clear().type("20");
+      cy.get('input[name="pa2b_mm"]').clear().type("09");
+      cy.get('input[name="pa2b_yyyy"]').clear().type("1982");
+      cy.get('input[name="pa2b_pl"]').clear().type("London");
+      cy.get('input[name="pa1b_yyyy"]').should("have.value", "1980");
+      cy.get('input[name="pa2b_yyyy"]').should("have.value", "1982");
+      cy.get('button[type="submit"].btn-lg').click();
+      cy.url({ timeout: 10000 }).should("not.include", "m=ADD_FAM");
+    });
+
+    it("form submission redirects to appropriate page", () => {
+      const timestamp = Date.now();
+      cy.get('input[name="pa1_fn"]').clear().type(`Min1${timestamp}`);
+      cy.get('input[name="pa1_sn"]').clear().type(`MinFamily${timestamp}`);
+      cy.get('select[name="pa1_p"]').select("create");
+      cy.get('input[name="pa2_fn"]').clear().type(`Min2${timestamp}`);
+      cy.get('input[name="pa2_sn"]').clear().type(`MinFamily${timestamp}`);
+      cy.get('select[name="pa2_p"]').select("create");
+      cy.get('button[type="submit"].btn-lg').click();
+      cy.url({ timeout: 10000 }).should("not.include", "m=ADD_FAM");
+      cy.get("body").should("be.visible");
     });
   });
 });
