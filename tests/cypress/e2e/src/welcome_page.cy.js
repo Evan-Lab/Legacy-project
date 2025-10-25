@@ -4,6 +4,11 @@ describe("Welcome page (server)", () => {
     Cypress.config("baseUrl") ||
     "http://localhost:2317";
 
+  const dbsName = [
+    '555SAMPLE',
+    'AlexClark'
+  ];
+
   beforeEach(() => {
     cy.visit(base + "/");
   });
@@ -12,31 +17,40 @@ describe("Welcome page (server)", () => {
     cy.get("h1")
       .contains("Choose a genealogy")
       .should("be.visible")
-      .and("have.class", "mt-5");
   });
 
-  it("verifies container and text-center classes on main div", () => {
-    cy.get("div.container").should("exist").and("have.class", "text-center");
-  });
+  it("shows the text above the form", () => {
+    cy.get("span")
+      .contains("Please, enter the name of the database you want to use:")
+      .should("be.visible")
+  })
 
   it("shows the database input form with Bootstrap classes", () => {
     cy.get("form")
       .should("exist")
-      .and("have.class", "form-inline")
-      .and("have.class", "d-flex")
-      .and("have.class", "justify-content-center")
-      .and("have.class", "mt-2");
 
-    cy.get('input[name="b"]')
+    cy.get('form input[name="b"]')
       .should("exist")
+      .should("be.visible")
       .and("have.class", "form-control")
-      .and("have.class", "col-8");
 
-    cy.get('button[type="submit"]')
+    cy.get('form button[type="submit"]')
       .should("exist")
+      .should("be.visible")
       .and("have.class", "btn")
-      .and("have.class", "btn-outline-secondary")
-      .and("have.class", "ml-2");
+  });
+
+   it('should navigate to the correct genealogy page after search', () => {
+    dbsName.forEach(dbName => {
+      cy.get('form input[name="b"]').clear().type(dbName);
+
+      cy.get('form button[type="submit"]').click();
+
+      cy.url().should('include', dbName);
+      cy.get('h1').should('contain.text', dbName);
+
+      cy.go('back');
+    });
   });
 
   it("shows the language selection heading with Bootstrap classes", () => {
@@ -68,23 +82,36 @@ describe("Welcome page (server)", () => {
       .and("have.class", "btn-outline-secondary");
   });
 
-  it("verifies language container has correct Bootstrap classes", () => {
-    cy.get("div.d-flex")
-      .should("exist")
-      .and("have.class", "flex-wrap")
-      .and("have.class", "justify-content-center")
-      .and("have.class", "col-10")
-      .and("have.class", "mx-auto");
+  it('should display the list of available genealogies', () => {
+    cy.get('div.mt-4')
+      .should('contain.text', 'List of available genealogies:')
+      .and('contain.text', '555SAMPLE')
+      .and('contain.text', 'AlexClark');
   });
 
-  it("shows GeneWeb footer with correct classes", () => {
-    cy.get("div.btn-group")
-      .should("exist")
-      .and("have.class", "float-right")
-      .and("have.class", "mt-5")
-      .and("have.class", "mr-5");
+  it('list of databases should have correct links', () => {
+    cy.get('div.mt-4 a')
+      .eq(0)
+      .should('have.attr', 'href', '555SAMPLE')
+      .and('contain.text', '555SAMPLE');
 
-    cy.contains("GeneWeb v.").should("exist");
-    cy.get('a[href*="github.com/geneweb"]').should("exist");
+    cy.get('div.mt-4 a')
+      .eq(1)
+      .should('have.attr', 'href', 'AlexClark')
+      .and('contain.text', 'AlexClark');
+  });
+
+  it('should navigate correctly when clicking each link', () => {
+    dbsName.forEach(dbName => {
+      cy.contains('div.mt-4 a', dbName)
+        .should('have.attr', 'href', dbName)
+        .click();
+
+      cy.url().should('include', '/' + dbName);
+
+      cy.get('h1').should('contain.text', dbName);
+
+      cy.go('back');
+    });
   });
 });
