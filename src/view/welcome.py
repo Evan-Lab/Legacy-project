@@ -6,13 +6,13 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 
+from .templates import templates
+
 from src.app import app
 from src.apps.book import BookAppDep
 
 # app.mount("/static", StaticFiles(directory="static"), name="static")
 
-
-templates = Jinja2Templates(directory="templates")
 
 
 
@@ -112,7 +112,7 @@ async def welcome(request: Request, book: BookAppDep) -> HTMLResponse:
         "browsing_with_sosa_ref": False,
         "has_history": True,
         "has_misc_notes": False,
-        "base": {"name": dto.base.name, "real_nb_persons": dto.base.real_nb_persons, "has_notes": dto.base.has_notes},
+        "base": {"name": dto.base.name, "real_nb_persons": dto.base.real_nb_persons, "has_notes": False},
         "b": {"default_lang":"en","propose_titles":"yes","history":"yes","counter":"yes"},
         "user": {"name":"", "ident":"guest", "key":""},
         "e": {"i":"", "p":"", "n":"", "pn":"", "oc":""},

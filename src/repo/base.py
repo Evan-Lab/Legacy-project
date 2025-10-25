@@ -23,3 +23,7 @@ class BaseRepo:
     def get_by_name(self, name: str) -> Base | None:
         statement = select(Base).where(Base.name == name)
         return self.session.exec(statement).one_or_none()
+
+    def get_all(self) -> list[Base]:
+        statement = select(Base)
+        return list(self.session.exec(statement).all())
