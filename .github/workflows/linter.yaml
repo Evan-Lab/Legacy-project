@@ -12,6 +12,7 @@ jobs:
     if: >
       !contains(join(github.event.pull_request.labels.*.name, ','), 'documentation')
       && !contains(join(github.event.pull_request.labels.*.name, ','), 'tests')
+      && !contains(join(github.event.pull_request.labels.*.name, ','), 'CI/CD')
 
     steps:
       - name: Checkout repository
@@ -40,6 +41,7 @@ jobs:
     if: >
       !contains(join(github.event.pull_request.labels.*.name, ','), 'documentation')
       && !contains(join(github.event.pull_request.labels.*.name, ','), 'tests')
+      && !contains(join(github.event.pull_request.labels.*.name, ','), 'CI/CD')
 
     steps:
       - name: Checkout repository
