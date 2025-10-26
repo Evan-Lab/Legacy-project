@@ -122,7 +122,7 @@ Standards coverage:
 ### Modern Implementation (Target)
 - **Language:** Python 3.8+
 - **Database:** PostgreSQL for genealogical data storage
-- **Testing:** pytest, selenium, accessibility testing tools
+- **Testing:**: pytest, cypress, accessibility testing tools
 - **Deployment:** Docker containers, CI/CD pipeline
 
 
@@ -152,11 +152,11 @@ Original OCaml system maintained as fallback with complete restoration procedure
 ## Team & Responsibilities
 
 ### Development Team
-- **Evan LABOURDETTE:** 
-- **Maxime SENARD** 
-- **Baptiste PERARD:** 
-- **Edouard BELHOMME:** 
-- **Julia TRAN:** 
+- **Evan LABOURDETTE:** :Tests
+- **Maxime SENARD** : CI/CD & Functional Code Simple
+- **Baptiste PERARD:** : Tests
+- **Edouard BELHOMME:** : Tests
+- **Julia TRAN:**: Documentation 
 
 
 ---
@@ -184,7 +184,7 @@ All project documentation is centralized in the `/docs` directory with comprehen
 ## Contributing
 
 ### Development Workflow
-1. **Branch Strategy:** Feature branches from `develop` branch
+1. **Branch Strategy:** Feature branches from `dev` branch
 2. **Code Review:** Mandatory peer review for all genealogy calculation logic
 3. **Testing:** Automated test execution on all commits
 4. **Documentation:** Update relevant docs with all functional changes
