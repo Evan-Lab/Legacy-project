@@ -4,7 +4,7 @@ describe("Update Family Page", () => {
     Cypress.config("baseUrl") ||
     "http://localhost:8000";
   beforeEach(() => {
-    cy.visit("/555SAMPLE?m=MOD_FAM&i=0&ip=0");
+    cy.visit("/555Sample?m=MOD_FAM&i=0&ip=0");
   });
 
   context("Initial load", () => {

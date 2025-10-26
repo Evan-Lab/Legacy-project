@@ -4,7 +4,7 @@ describe("Update Individual Page", () => {
         Cypress.config("baseUrl") ||
         "http://localhost:8000";
     beforeEach(() => {
-        cy.visit("/555SAMPLE?m=MOD_IND&i=0");
+        cy.visit("/555Sample?m=MOD_IND&i=0");
     });
 
     context("Page load and structure: Update Individual", () => {

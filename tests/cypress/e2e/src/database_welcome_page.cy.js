@@ -3,7 +3,7 @@ describe("Database welcome page (server)", () => {
     Cypress.env("BASE_URL") ||
     Cypress.config("baseUrl") ||
     "http://localhost:2317";
-  const testDatabase = Cypress.env("TEST_DB") || "555SAMPLE";
+  const testDatabase = Cypress.env("TEST_DB") || "555Sample";
 
   beforeEach(() => {
     cy.visit(`${base}/?b=${testDatabase}`);

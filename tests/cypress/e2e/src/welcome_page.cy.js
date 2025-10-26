@@ -5,7 +5,7 @@ describe("Welcome page (server)", () => {
     "http://localhost:2317";
 
   const dbsName = [
-    '555SAMPLE',
+    '555Sample',
     'AlexClark'
   ];
 
@@ -85,15 +85,15 @@ describe("Welcome page (server)", () => {
   it('should display the list of available genealogies', () => {
     cy.get('div.mt-4')
       .should('contain.text', 'List of available genealogies:')
-      .and('contain.text', '555SAMPLE')
+      .and('contain.text', '555Sample')
       .and('contain.text', 'AlexClark');
   });
 
   it('list of databases should have correct links', () => {
     cy.get('div.mt-4 a')
       .eq(0)
-      .should('have.attr', 'href', '555SAMPLE')
-      .and('contain.text', '555SAMPLE');
+      .should('have.attr', 'href', '555Sample')
+      .and('contain.text', '555Sample');
 
     cy.get('div.mt-4 a')
       .eq(1)
