@@ -1,3 +1,5 @@
+const normalizeText = (text = "") => text.replace(/\s+/g, " ").trim();
+
 describe("Compact descendants tree page (server)", () => {
   const base =
     Cypress.env("BASE_URL") ||
@@ -6,6 +8,9 @@ describe("Compact descendants tree page (server)", () => {
 
   const genealogy = "555Sample";
   const pageUrl = `${base}/${genealogy}?p=mary+ann&n=wilson&m=D&t=TV&v=3`;
+  const computeDestinationUrl = (href) => new URL(href, pageUrl).href;
+  const defaultSpParam = new URL(pageUrl).searchParams.get("sp");
+  const expectedPath = new URL(pageUrl).pathname;
 
   beforeEach(() => {
     cy.visit(pageUrl);
@@ -20,6 +25,36 @@ describe("Compact descendants tree page (server)", () => {
       "contain.text",
       "Wilson"
     );
+  });
+
+  it("filters spouse information out when the spouse toggle is used", () => {
+    cy.contains("table#dag", "Robert Eugene Williams").should("exist");
+
+    cy.get("nav.navbar.fixed-bottom a").then(($links) => {
+      const linkElement = Array.from($links).find((element) => {
+        const href = element.getAttribute("href") || "";
+        return /[?&]sp=/.test(href);
+      });
+
+      expect(linkElement, "spouse filter link").to.exist;
+
+      cy.wrap(linkElement).click({ force: true });
+    });
+
+    cy.location().should((location) => {
+      const params = new URLSearchParams(location.search);
+      const spValue = params.get("sp");
+
+      expect(location.pathname).to.eq(expectedPath);
+      expect(params.get("p"), "person first name parameter").to.eq(
+        "mary ann"
+      );
+      expect(params.get("n"), "person surname parameter").to.eq("wilson");
+      expect(spValue, "sp parameter").to.not.equal(defaultSpParam);
+      expect(spValue, "sp parameter").to.not.equal(null);
+    });
+
+    cy.get("table#dag").should("not.contain", "Robert Eugene Williams");
   });
 
   it("shows the generation information in the heading", () => {
@@ -128,15 +163,48 @@ describe("Compact descendants tree page (server)", () => {
     cy.get("table#dag.ml-4").should("exist");
   });
 
-  it("verifies navigation links have proper hrefs", () => {
-    cy.get("table#dag a.stretched-link")
+  it("redirects to the selected person when a compact tree entry is clicked", () => {
+    let expectedUrl;
+    let personLabel;
+
+    cy.get("table#dag td")
+      .filter((_, element) =>
+        Cypress.$(element).find("a.stretched-link").length > 0
+      )
       .first()
-      .then(($link) => {
-        if ($link.length > 0) {
-          expect($link.attr("href")).to.exist;
-          expect($link.attr("href")).to.include("m=D");
-          expect($link.attr("href")).to.include("t=TV");
-        }
+      .then(($cell) => {
+        const $link = $cell.find("a.stretched-link").first();
+        const href = $link.attr("href");
+        expect(href, "compact descendant link href")
+          .to.be.a("string")
+          .and.not.empty;
+
+        expectedUrl = computeDestinationUrl(href);
+        const nameSource =
+          $cell.find("a.normal_anchor").first().text() ||
+          $cell.find("div.d-flex-row.flex-column").first().text();
+
+        personLabel = normalizeText(nameSource)
+          .replace(/^\d+\s*/, "")
+          .replace(/\s+\d{3,4}.*$/, "")
+          .split(" (")[0]
+          .trim();
+
+        expect(personLabel, "extracted compact descendant name")
+          .to.be.a("string")
+          .and.not.empty;
+
+        cy.wrap($link).click({ force: true });
+      });
+
+    cy.location("href").should((currentUrl) => {
+      expect(new URL(currentUrl).href).to.eq(expectedUrl);
+    });
+
+    cy.contains("h3", "Compact descendants tree")
+      .invoke("text")
+      .then((heading) => {
+        expect(normalizeText(heading)).to.include(personLabel);
       });
   });
 

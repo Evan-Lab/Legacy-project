@@ -49,6 +49,42 @@ describe("Anniversaries menu page (server)", () => {
       .and("contain.text", "Wedding anniversaries");
   });
 
+  [
+    {
+      name: "Birthdays",
+      selector: 'a[href*="m=AN"]',
+      urlPart: "m=AN",
+      confirmation: /Birthdays/i,
+    },
+    {
+      name: "Deceased",
+      selector: 'a[href*="m=AD"]',
+      urlPart: "m=AD",
+      confirmation: /Anniversaries of dead people/i,
+    },
+    {
+      name: "Weddings",
+      selector: 'a[href*="m=AM"]',
+      urlPart: "m=AM",
+      confirmation: /Wedding anniversaries/i,
+    },
+  ].forEach(({ name, selector, urlPart, confirmation }) => {
+    it(`navigates to ${name} page when its link is clicked`, () => {
+      cy.get(selector)
+        .first()
+        .should("be.visible")
+        .then(($link) => {
+          const href = $link.attr("href");
+          expect(href, `${name} link has an href`).to.exist;
+          expect(href).to.include(urlPart);
+          cy.wrap($link).click();
+        });
+
+      cy.location("search").should("include", urlPart);
+      cy.contains(confirmation).should("be.visible");
+    });
+  });
+
   it("verifies the robots meta tag", () => {
     cy.get('meta[name="robots"]').should("have.attr", "content", "none");
   });
