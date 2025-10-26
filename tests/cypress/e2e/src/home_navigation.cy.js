@@ -34,8 +34,31 @@ describe("Home navigation components (server)", () => {
     cy.get("div.d-flex.flex-column.fix_top.fix_left.home-xs").should("exist");
   });
 
-  it("home button links to base URL", () => {
-    cy.get("div.home-xs a .fa-house").parent().should("have.attr", "href");
+  it("home button navigates to base page", () => {
+    cy.get("div.home-xs a[tabindex='1']")
+      .should("be.visible")
+      .then(($link) => {
+        const linkEl = $link[0] || $link;
+        const rawHref =
+          (typeof $link.attr === "function" && $link.attr("href")) ||
+          (linkEl && linkEl.getAttribute
+            ? linkEl.getAttribute("href")
+            : null);
+
+        expect(rawHref, "home link should have href").to.be.a("string");
+        const normalizedLinkHref = rawHref.replace(/^(\.\/)/, "");
+        expect(normalizedLinkHref).to.eq(`${genealogy}?`);
+
+        cy.wrap(linkEl).click();
+
+        cy.location("pathname").should("eq", `/${genealogy}`);
+        cy.location("search").should((search) => {
+          expect(["", "?"]).to.include(search);
+        });
+        cy.location("href").should((href) => {
+          expect(href.replace(/\?$/, "")).to.eq(`${base}/${genealogy}`);
+        });
+      });
   });
 
   it("search button opens the search modal", () => {
@@ -95,6 +118,40 @@ describe("Home navigation components (server)", () => {
     cy.get("form#collapse_search input[name='m'][value='S']").should("exist");
   });
 
+  it("searches for a person from the home menu and shows result details", () => {
+    const searchQuery = "Mary Ann Wilson";
+
+    cy.get("div.home-xs a[data-toggle='modal']").click();
+    cy.get("#searchmodal").should("be.visible");
+
+    cy.get("#searchmodal input#fullname")
+      .should("have.attr", "name", "pn")
+      .clear()
+      .type(searchQuery);
+
+    cy.get("#searchmodal form#collapse_search").submit();
+
+    cy.location().then((location) => {
+      const params = new URLSearchParams(location.search);
+      const composedFullName =
+        params.get("pn") ||
+        [params.get("p"), params.get("n")].filter(Boolean).join(" ");
+
+      expect(location.pathname).to.eq(`/${genealogy}`);
+      expect(composedFullName.toLowerCase()).to.include("mary");
+      expect(composedFullName.toLowerCase()).to.include("wilson");
+    });
+
+    cy.contains("body", searchQuery).should("exist");
+
+    cy.get("body")
+      .invoke("text")
+      .then((text) => {
+        expect(text, "search results should mention 1822").to.match(/1822/);
+        expect(text, "search results should mention 1905").to.match(/1905/);
+      });
+  });
+
   it("can type in the fullname search field", () => {
     cy.get("div.home-xs a[data-toggle='modal']").click();
     cy.get("input#fullname").type("Wilson");
@@ -110,13 +167,25 @@ describe("Home navigation components (server)", () => {
     cy.get("input#p_all").should("not.be.checked");
   });
 
-  it("random button has a valid href", () => {
+  it("random button navigates to a person page", () => {
     cy.get("div.home-xs i[class*='fa-dice-']")
-      .parent()
+      .parent("a")
+      .should("be.visible")
       .then(($link) => {
-        const href = $link.attr("href");
-        expect(href).to.exist;
-        expect(href).to.match(/[?&]i=/);
+        const linkEl = $link[0] || $link;
+        const rawHref =
+          (typeof $link.attr === "function" && $link.attr("href")) ||
+          (linkEl && linkEl.getAttribute
+            ? linkEl.getAttribute("href")
+            : null);
+
+        expect(rawHref, "random link should have href").to.be.a("string");
+
+        cy.wrap(linkEl).click();
+
+        cy.location("href").should((href) => {
+          expect(/[?&](i|p)=/.test(href)).to.be.true;
+        });
       });
   });
 

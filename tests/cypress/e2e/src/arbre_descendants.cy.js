@@ -1,3 +1,5 @@
+const normalizeText = (text = "") => text.replace(/\s+/g, " ").trim();
+
 describe("Descendants tree page (server)", () => {
   const base =
     Cypress.env("BASE_URL") ||
@@ -6,6 +8,9 @@ describe("Descendants tree page (server)", () => {
 
   const genealogy = "555Sample";
   const pageUrl = `${base}/${genealogy}?p=mary+ann&n=wilson&m=D&t=V&v=3`;
+  const computeDestinationUrl = (href) => new URL(href, pageUrl).href;
+  const defaultSpParam = new URL(pageUrl).searchParams.get("sp");
+  const expectedPath = new URL(pageUrl).pathname;
 
   beforeEach(() => {
     cy.visit(pageUrl);
@@ -66,12 +71,35 @@ describe("Descendants tree page (server)", () => {
     cy.get("body").should("exist");
   });
 
-  it("has clickable person links that work", () => {
-    cy.get("table.destree_table a.normal_anchor")
-      .first()
-      .then(($link) => {
-        expect($link.attr("href")).to.exist;
-        expect($link.attr("href")).to.match(/[?&](p=|i=)/);
+  it("redirects to the selected person when a descendant link is clicked", () => {
+    let expectedUrl;
+    let linkLabel;
+
+    cy.get("table.destree_table a.normal_anchor").then(($links) => {
+      const linkElement = Array.from($links).find((element) => {
+        const href = element.getAttribute("href") || "";
+        return href.trim().length > 0;
+      });
+
+      expect(linkElement, "descendant link element").to.exist;
+
+      const href = linkElement.getAttribute("href") || "";
+      expectedUrl = computeDestinationUrl(href);
+      linkLabel = normalizeText(linkElement.textContent || "")
+        .split(" (")[0]
+        .trim();
+
+      cy.wrap(linkElement).click();
+    });
+
+    cy.location("href").should((currentUrl) => {
+      expect(new URL(currentUrl).href).to.eq(expectedUrl);
+    });
+
+    cy.get("h1")
+      .invoke("text")
+      .then((heading) => {
+        expect(normalizeText(heading)).to.include(linkLabel);
       });
   });
 
@@ -92,6 +120,41 @@ describe("Descendants tree page (server)", () => {
       "have.attr",
       "content",
       "width=device-width, initial-scale=1, shrink-to-fit=no"
+    );
+  });
+
+  it("filters spouse information out when the spouse toggle is used", () => {
+    cy.contains("table.destree_table", "Robert Eugene Williams").should(
+      "exist"
+    );
+
+    cy.get("nav.navbar.fixed-bottom a").then(($links) => {
+      const linkElement = Array.from($links).find((element) => {
+        const href = element.getAttribute("href") || "";
+        return /[?&]sp=/.test(href);
+      });
+
+      expect(linkElement, "spouse filter link").to.exist;
+
+      cy.wrap(linkElement).click({ force: true });
+    });
+
+    cy.location().should((location) => {
+      const params = new URLSearchParams(location.search);
+      const spValue = params.get("sp");
+
+      expect(location.pathname).to.eq(expectedPath);
+      expect(params.get("p"), "person first name parameter").to.eq(
+        "mary ann"
+      );
+      expect(params.get("n"), "person surname parameter").to.eq("wilson");
+      expect(spValue, "sp parameter").to.not.equal(defaultSpParam);
+      expect(spValue, "sp parameter").to.not.equal(null);
+    });
+
+    cy.get("table.destree_table").should(
+      "not.contain",
+      "Robert Eugene Williams"
     );
   });
 
