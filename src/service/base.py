@@ -17,6 +17,9 @@ class BaseService:
     def get_bases_list(self) -> list[IndexDto.BaseDto]:
         bases = self.repo.get_all()
         return [IndexDto.BaseDto(slug=quote(base.name), label=base.name) for base in bases]
+    
+    def count_persons(self, base: Base) -> int:
+        return self.repo.count_persons(base)
 
     @staticmethod
     def default(session: SessionDep, base: str = Path(...)) -> Base:
