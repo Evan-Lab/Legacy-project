@@ -90,15 +90,26 @@ class JinjaGenerator:
         return res
 
     @_render.register(pytypes.Tree)
-    def _render_tree(self, tree: pytypes.Tree, escape: bool) -> str:
-        return "".join(self._render(node, escape) for node in tree.nodes)
+    def _render_tree(self, tree: pytypes.Tree, escape: bool, treeOp = "") -> str:
+        # rid = f"Tree-{id(tree)}"
+        # print(f"Rendering tree {rid} with {len(tree.nodes)} nodes...")
+        parts = [self._render(node, escape) for node in tree.nodes]
+        res = treeOp.join([p for p in parts if p != ""])
+        # print(f"Rendering tree {rid} -> {res[:120]}")
+        return res
 
     @_render.register(pytypes.Node)
     def _render_node(self, node: pytypes.Node, escape: bool) -> str:
-        return self._render(node.value, escape)
+        # rid = f"Node-{id(node)}"
+        # print(f"Rendering node {rid}: {type(node.value).__name__}...")
+        res = self._render(node.value, escape)
+        # print(f"Rendering node {rid}: {type(node.value).__name__} -> {res[:120]}")
+        return res
 
     @_render.register(pytypes.AText)
     def _render_value(self, value: pytypes.AText, escape: bool) -> str:
+        if value.text == "":
+            return ""
         return str(value.text) if escape else '"' + str(value.text) + '"'
 
     @_render.register(pytypes.AVar)
@@ -111,7 +122,7 @@ class JinjaGenerator:
     @_render.register(pytypes.ATransl)
     def _render_transl(self, transl: pytypes.ATransl, escape: bool) -> str:
         res = r"{{ " if escape else ""
-        res += r"_(" + transl.key
+        res += "_(\"" + transl.key + "\""
         if transl.variant and transl.variant != "":
             res += f", variant='{transl.variant}'"
         res += r")"
@@ -175,9 +186,9 @@ class JinjaGenerator:
         res = r"{{ " if escape else ""
         res += apply.macro + r"("
         res += ", ".join(
-            f"{arg[0]}={self._render(arg[1], False)}"
+            f"{arg[0]}={self._render_tree(arg[1], False, treeOp=' + ')}"
             if arg[0]
-            else self._render(arg[1], False)
+            else self._render_tree(arg[1], False, treeOp=' + ')
             for arg in apply.args
         )
         res += r")"
@@ -203,17 +214,29 @@ class JinjaGenerator:
     @_render.register(pytypes.AOp1)
     def _render_op1(self, op1: pytypes.AOp1, escape: bool) -> str:
         op = self._map_op(op1.op)
-        res = r"{{ " if escape else r"( "
-        res += op + " " + self._render(op1.a, False)
-        res += r" }}" if escape else r" )"
+        res = r"{{ " if escape else r""
+        res += op + " "
+        a = self._render(op1.a, False)
+        if a == "":
+            a = '""'
+        res += a
+        res += r" }}" if escape else r""
         return res
 
     @_render.register(pytypes.AOp2)
     def _render_op2(self, op2: pytypes.AOp2, escape: bool) -> str:
         op = self._map_op(op2.op)
-        res = r"{{ " if escape else r"( "
-        res += self._render(op2.a, False) + " " + op + " " + self._render(op2.b, False)
-        res += r" }}" if escape else r" )"
+        res = r"{{ " if escape else r""
+        a = self._render(op2.a, False)
+        if a == "":
+            a = '""'
+        res += a
+        res += " " + op + " "
+        b = self._render(op2.b, False)
+        if b == "":
+            b = '""'
+        res += b
+        res += r" }}" if escape else r""
         return res
 
     @_render.register(pytypes.AInt)
@@ -225,7 +248,7 @@ class JinjaGenerator:
     def _render_include(self, include: pytypes.AInclude, escape: bool) -> str:
         match include.value:
             case pytypes.AInclude.FileInclude():
-                return r"{% include '" + include.value.path + r"' %}" + "\n"
+                return r"{% include '" + include.value.path + ".html.j2" + r"' %}" + "\n"
             case pytypes.AInclude.RawInclude():
                 return include.value.raw + "\n"
             case _:
@@ -234,8 +257,8 @@ class JinjaGenerator:
     @_render.register(pytypes.PUrlFor)
     def _render_url_for(self, url_for: pytypes.PUrlFor, escape: bool) -> str:
         res = r"{{ " if escape else ""
-        res += r"url_for('" + url_for.base + r"'"
-        res += r", path='" + url_for.path + r"'"
+        res += "url_for(\"" + url_for.base + "\""
+        res += ", path=\"" + url_for.path + "\""
         res += r")"
         res += r" }}" if escape else ""
         return res

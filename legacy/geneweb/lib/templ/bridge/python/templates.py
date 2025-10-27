@@ -156,8 +156,8 @@ class Template:
 
     def _rule_url_for(self):
         MAPPING = {
-            "images_prefix": "static/images/",
-            "etc_prefix": "static/",
+            "images_prefix": ("static", "images/"),
+            "etc_prefix": ("static", ""),
         }
 
         PATH_REGEX = r"^[a-zA-Z0-9._/\-]+"
@@ -200,7 +200,11 @@ class Template:
                     continue
                 next_node.value.text = next_node.value.text.removeprefix(path)
 
-                purlfor = pytypes.PUrlFor(base=mapping, path=path)
+                path = mapping[1] + path
+
+                path = path.strip()
+
+                purlfor = pytypes.PUrlFor(base=mapping[0], path=path)
                 self.nodes[index].value = purlfor
 
 

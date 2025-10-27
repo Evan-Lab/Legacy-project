@@ -15,7 +15,7 @@ def find_files_with_extension(directory: str, extension: str) -> list[tuple[str,
             if file.endswith(extension):
                 path = os.path.join(root, file)
                 name = path.removeprefix(directory + os.sep).removesuffix(extension)
-                # if name != "home_full":
+                # if name != "css":
                 #     continue
                 matches.append((path, name))
     return matches
