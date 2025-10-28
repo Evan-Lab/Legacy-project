@@ -21,41 +21,33 @@ jobs:
             libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev \
             libnss3 libxss1 libasound2t64 xvfb
 
-      - name: Initialize opam and install ocamlfind
+      - name: 🔧 Initialize OPAM and install ocamlfind
         run: |
-          echo "🔧 Initializing OPAM..."
           opam init -y --disable-sandboxing
           eval $(opam env)
-          echo "📦 Installing OCamlfind..."
           opam install -y ocamlfind
-          echo "✅ OCaml environment setup complete"
 
       - name: 🧱 Build GeneWeb from source
         run: |
           echo "📥 Cloning GeneWeb repository..."
           git clone https://github.com/geneweb/geneweb.git
-          echo "\n📂 Contents of current directory:"
-          ls
-          echo "\n🚀 Entering GeneWeb directory..."
           cd geneweb
-          echo "📂 Contents of GeneWeb directory:"
-          ls
-          echo "\n⚙️ Configuring GeneWeb..."
-          ocaml ./configure.ml
-          echo "📂 Contents after configuration:"
-          ls
-          echo "\n🏗️ Building GeneWeb distribution..."
+
+          echo "⚙️ Activating OPAM environment..."
+          eval $(opam env)
+
+          echo "⚙️ Configuring GeneWeb..."
+          ocaml ./configure.ml --prefix /usr/local
+
+          echo "🏗️ Building GeneWeb..."
           make clean distrib
-          echo "\n📦 Entering distribution directory..."
-          cd distribution/
-          echo "📂 Distribution contents:"
-          ls
+
+          echo "📦 Installing GeneWeb..."
+          sudo make install
 
       - name: 🚀 Start GeneWeb server
         run: |
-          echo "📁 Creating GeneWeb data directory..."
           mkdir -p ~/geneweb-data
-          echo "🚀 Starting GeneWeb server daemon..."
           nohup geneweb -daemon -hd ~/geneweb-data -bd ~/geneweb-data -port 2317 &
           echo "⏳ Waiting for GeneWeb to start..."
           for i in {1..10}; do
@@ -83,3 +75,4 @@ jobs:
           start: npx cypress run --config baseUrl=http://localhost:2317
           wait-on: 'http://localhost:2317'
           browser: chrome
+  
