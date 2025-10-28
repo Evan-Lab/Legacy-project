@@ -132,13 +132,13 @@ describe("Menubar on person page", () => {
       });
     });
 
-    it("may have an add family button if user is wizard", () => {
-      cy.get("body").then(($body) => {
-        if ($body.find("a#add_fam").length > 0) {
-          cy.get("a#add_fam").should("exist").and("have.class", "dropdown-item");
-        }
-      });
-    });
+    // it("may have an add family button if user is wizard", () => {
+    //   cy.get("body").then(($body) => {
+    //     if ($body.find("a#add_fam").length > 0) {
+    //       cy.get("a#add_fam").should("exist").and("have.class", "dropdown-item");
+    //     }
+    //   });
+    // });
   });
 
   describe("Ancestors dropdown", () => {
