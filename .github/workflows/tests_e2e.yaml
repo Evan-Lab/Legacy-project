@@ -79,6 +79,7 @@ jobs:
           npm ci
       
       - name: 🧪 Run Cypress E2E tests
+        id: cypress-tests
         uses: cypress-io/github-action@v6
         with:
           working-directory: tests
@@ -87,7 +88,7 @@ jobs:
         continue-on-error: true
       
       - name: 📊 Upload Cypress screenshots on failure
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
@@ -113,25 +114,8 @@ jobs:
           retention-days: 7
           if-no-files-found: ignore
       
-      - name: 📈 Upload Cypress coverage
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-coverage
-          path: tests/coverage
-          retention-days: 30
-          if-no-files-found: ignore
-      
-      - name: 📊 Generate coverage report
-        if: always()
+      - name: ❌ Fail workflow if tests failed
+        if: steps.cypress-tests.outcome == 'failure'
         run: |
-          cd tests
-          if [ -d "coverage" ]; then
-            npx nyc report --reporter=text-summary
-            echo "## 📊 Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-            npx nyc report --reporter=text >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
-          else
-            echo "No coverage data found"
-          fi
+          echo "::error::Cypress tests failed!"
+          exit 1
