@@ -41,6 +41,13 @@ jobs:
           echo "🏗️ Building GeneWeb..."
           make clean distrib
       
+      - name: 📁 Copy database files to GeneWeb
+        run: |
+          echo "📋 Copying files from legacy/geneweb/library to distribution/bases..."
+          cp -r legacy/geneweb/library/* geneweb/distribution/bases/
+          echo "✅ Files copied successfully"
+          ls -la geneweb/distribution/bases/
+      
       - name: 🚀 Start GeneWeb server
         run: |
           eval $(opam env)
