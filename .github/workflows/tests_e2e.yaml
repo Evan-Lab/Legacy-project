@@ -10,6 +10,11 @@ jobs:
   e2e-tests:
     runs-on: ubuntu-latest
 
+    env:
+      OPAMYES: "true"
+      OPAMJOBS: "2"
+      OPAMROOT: /home/runner/.opam
+
     steps:
       - name: 🧩 Checkout repository
         uses: actions/checkout@v4
@@ -21,28 +26,23 @@ jobs:
             libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev \
             libnss3 libxss1 libasound2t64 xvfb
 
-      - name: 🔧 Initialize OPAM and install ocamlfind
+      - name: 🔧 Initialize OPAM and install required OCaml packages
         run: |
+          echo "🔧 Initializing OPAM..."
           opam init -y --disable-sandboxing
           eval $(opam env)
-          opam install -y ocamlfind dune base stdlib-shims
+          echo "📦 Installing OCaml dependencies for GeneWeb..."
+          opam install -y ocamlfind dune base stdlib-shims \
+            cppo fmt logs re cmdliner ppx_deriving ppx_import pp_loc
 
       - name: 🧱 Build GeneWeb from source
         run: |
           echo "📥 Cloning GeneWeb repository..."
           git clone https://github.com/geneweb/geneweb.git
           cd geneweb
-
-          echo "⚙️ Activating OPAM environment..."
           eval $(opam env)
-
-          echo "⚙️ Configuring GeneWeb..."
-          ocaml ./configure.ml
-
-          echo "🏗️ Building GeneWeb..."
+          ocaml ./configure.ml --prefix /usr/local
           make clean distrib
-
-          echo "📦 Installing GeneWeb..."
           sudo make install
 
       - name: 🚀 Start GeneWeb server
@@ -75,4 +75,4 @@ jobs:
           start: npx cypress run --config baseUrl=http://localhost:2317
           wait-on: 'http://localhost:2317'
           browser: chrome
-  
+    
