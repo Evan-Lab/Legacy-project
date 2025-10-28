@@ -1,0 +1,58 @@
+name: E2E Tests on GeneWeb
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🧩 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Install OCaml & system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y opam ocaml make git curl libgtk2.0-0 libgtk-3-0 \
+            libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 xvfb
+
+      - name: 🧱 Build GeneWeb from source
+        run: |
+          git clone https://github.com/geneweb/geneweb.git
+          cd geneweb
+          make distrib
+          sudo make install
+
+      - name: 🚀 Start GeneWeb server
+        run: |
+          mkdir -p ~/geneweb-data
+          nohup geneweb -daemon -hd ~/geneweb-data -bd ~/geneweb-data -port 2317 &
+          echo "⏳ Waiting for GeneWeb to start..."
+          for i in {1..10}; do
+            if curl -sSf http://localhost:2317 >/dev/null; then
+              echo "✅ GeneWeb is running!"
+              break
+            fi
+            sleep 3
+          done
+
+      - name: 🧰 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 📦 Install Cypress dependencies
+        run: |
+          cd tests
+          npm ci
+
+      - name: 🧪 Run Cypress E2E tests
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: tests
+          start: npx cypress run --config baseUrl=http://localhost:2317
+          wait-on: 'http://localhost:2317'
+          browser: chrome
