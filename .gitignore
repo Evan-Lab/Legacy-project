@@ -68,3 +68,6 @@ poetry.lock
 
 # test db
 database.db
+
+# Environment variables
+.env
