@@ -398,7 +398,7 @@ perso_short.html.j2: Line 167
 
 #### Task 1.3: Add Title Tags
 **Affected files:** 2 files  
-**Effort:** 1 hour
+
 
 **Before:**
 ```jinja2
@@ -441,7 +441,6 @@ perso_short.html.j2: Line 167
 
 ### 4.2 Phase 2: P1 - High Priority (Should Fix)
 
-**Timeline:** 2-3 days  
 
 #### Task 2.1: Add Meta Descriptions
 **Affected files:** 65 files  
@@ -528,6 +527,7 @@ After automated fixes, manual testing is required for:
 ### 6.1 For Developers that will work on the project later to optimize it
 
 **DO:**
+
 ✅ Always add `alt` attributes to `<img>` tags  
 ✅ Include `width` and `height` on images  
 ✅ Use `lang` attribute on `<html>` tag  
@@ -536,6 +536,7 @@ After automated fixes, manual testing is required for:
 ✅ Use external CSS instead of inline styles
 
 **DON'T:**
+
 ❌ Use empty `alt=""` for informative images  
 ❌ Skip heading levels (h1 → h3)  
 ❌ Use inline styles  
