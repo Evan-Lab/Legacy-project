@@ -41,7 +41,7 @@ jobs:
           git clone https://github.com/geneweb/geneweb.git
           cd geneweb
           eval $(opam env)
-          ocaml ./configure.ml --prefix /usr/local
+          ocaml ./configure.ml
           make clean distrib
           sudo make install
 
