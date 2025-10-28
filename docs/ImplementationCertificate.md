@@ -3,7 +3,7 @@
 
 ## 1. Executive Summary
 
-Out certifies the successful implementation and validation of key components developed for the GeneWeb Legacy Migration Project. This is our implementation certifcate with all details of our passed and worked metrics.
+Our certificate certifies the successful implementation and validation of key components developed for the GeneWeb Legacy Migration Project. This is our implementation certifcate with all details of our passed and worked metrics.
 
 The implementation delivers a robust and fully functional end-to-end (E2E) testing framework alongside an automated template conversion system, ensuring both reliability and maintainability of the legacy application.
 
