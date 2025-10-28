@@ -23,28 +23,39 @@ jobs:
 
       - name: Initialize opam and install ocamlfind
         run: |
+          echo "🔧 Initializing OPAM..."
           opam init -y --disable-sandboxing
           eval $(opam env)
+          echo "📦 Installing OCamlfind..."
           opam install -y ocamlfind
+          echo "✅ OCaml environment setup complete"
 
       - name: 🧱 Build GeneWeb from source
         run: |
+          echo "📥 Cloning GeneWeb repository..."
           git clone https://github.com/geneweb/geneweb.git
-          echo "Contents of geneweb directory:"
+          echo "\n📂 Contents of current directory:"
           ls
+          echo "\n🚀 Entering GeneWeb directory..."
           cd geneweb
-          echo "Contents after entering geneweb directory:"
+          echo "📂 Contents of GeneWeb directory:"
           ls
+          echo "\n⚙️ Configuring GeneWeb..."
           ocaml ./configure.ml
-          echo "Contents after configuration:"
+          echo "📂 Contents after configuration:"
           ls
+          echo "\n🏗️ Building GeneWeb distribution..."
           make clean distrib
+          echo "\n📦 Entering distribution directory..."
           cd distribution/
+          echo "📂 Distribution contents:"
           ls
 
       - name: 🚀 Start GeneWeb server
         run: |
+          echo "📁 Creating GeneWeb data directory..."
           mkdir -p ~/geneweb-data
+          echo "🚀 Starting GeneWeb server daemon..."
           nohup geneweb -daemon -hd ~/geneweb-data -bd ~/geneweb-data -port 2317 &
           echo "⏳ Waiting for GeneWeb to start..."
           for i in {1..10}; do
