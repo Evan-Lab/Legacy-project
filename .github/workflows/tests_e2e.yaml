@@ -37,7 +37,7 @@ jobs:
           eval $(opam env)
 
           echo "⚙️ Configuring GeneWeb..."
-          ocaml ./configure.ml --prefix /usr/local
+          ocaml ./configure.ml
 
           echo "🏗️ Building GeneWeb..."
           make clean distrib
