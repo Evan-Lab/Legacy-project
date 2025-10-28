@@ -1,13 +1,32 @@
 # End-to-End Test Plan
 
 
-## Executive Summary — E2E Testing Approach
+## Executive Summary — E2E Testing Approach Plan (Test Policy)
 
-Due to the project’s legacy architecture and limited development timeframe, our testing strategy focuses exclusively on end-to-end (E2E) testing using Cypress. This approach ensures full validation of user workflows, interface interactions, and integration across all system components without requiring extensive unit or integration test refactoring in the existing codebase.
+Our testing strategy focuses exclusively on end-to-end (E2E) testing using Cypress. This approach ensures full validation of user workflows, interface interactions, and integration across all system components without requiring extensive unit or integration test refactoring in the existing codebase.
 
 E2E tests were chosen because they provide the highest assurance of functional correctness in a short time frame. They simulate real user behavior, covering the most critical actions such as navigation, search, data input, and rendering of templates. By testing the application from the user’s perspective, we guarantee that core functionalities work as intended despite underlying technical debt or legacy dependencies.
 
 In total, 477 E2E tests were executed successfully, validating all main user journeys and verifying that 100% of templates render correctly. This comprehensive coverage ensures functional stability and confidence in the application’s reliability, even in the absence of granular unit or component-level testing.
+
+## Why only E2E test ?
+
+E2E tests are the gold standard for validating a legacy system restoration:
+
+- They validate user behavior (what matters most to the client)
+
+- They prove that the system works end-to-end (full integration)
+
+- They are less fragile than unit tests (require less refactoring)
+
+For a QA/PM-oriented project (the targeted skill set), E2E tests are more relevant than unit tests:
+
+- They validate the restore phase (system-level validation)
+
+- They validate the deploy phase (full workflow verification)
+
+- They align directly with the test protocols required
+---
 ## 1. Introduction
 
 ### 1.1 Purpose
