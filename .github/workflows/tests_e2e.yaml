@@ -1,4 +1,4 @@
-name: E2E Tests on GeneWeb
+name: Run End-to-End Tests
 
 on:
   push:
