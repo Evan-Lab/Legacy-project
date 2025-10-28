@@ -1,15 +1,20 @@
 name: E2E Tests on GeneWeb
+
 on:
   push:
     branches: [ main ]
   pull_request:
+    branches: [ main ]
+
 jobs:
   e2e-tests:
     runs-on: ubuntu-latest
+
     env:
       OPAMYES: "true"
       OPAMJOBS: "2"
       OPAMROOT: /home/runner/.opam
+
     steps:
       - name: 🧩 Checkout repository
         uses: actions/checkout@v4
