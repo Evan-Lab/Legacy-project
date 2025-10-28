@@ -46,7 +46,7 @@ jobs:
           eval $(opam env)
           cd geneweb/distribution
           mkdir -p ~/geneweb-data
-          nohup ./gw/gwd -hd ./gw -bd ~/geneweb-data -port 2317 > ~/gwd.log 2>&1 &
+          nohup ./gw/gwd -hd ./gw -bd ~/geneweb-data -p 2317 > ~/gwd.log 2>&1 &
           echo "⏳ Waiting for GeneWeb to start..."
           for i in {1..10}; do
             if curl -sSf http://localhost:2317 >/dev/null 2>&1; then
@@ -76,6 +76,4 @@ jobs:
         uses: cypress-io/github-action@v6
         with:
           working-directory: tests
-          start: npx cypress run --config baseUrl=http://localhost:2317
-          wait-on: 'http://localhost:2317'
           browser: chrome
