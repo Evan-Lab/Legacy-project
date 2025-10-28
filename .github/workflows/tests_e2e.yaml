@@ -25,7 +25,7 @@ jobs:
         run: |
           opam init -y --disable-sandboxing
           eval $(opam env)
-          opam install -y ocamlfind
+          opam install -y ocamlfind dune base stdlib-shims
 
       - name: 🧱 Build GeneWeb from source
         run: |
