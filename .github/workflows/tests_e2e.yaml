@@ -34,19 +34,20 @@ jobs:
       
       - name: 🧱 Build GeneWeb from source
         run: |
-          cd geneweb
           eval $(opam env)
+          cd geneweb
           echo "⚙️ Configuring GeneWeb..."
           ocaml ./configure.ml
           echo "🏗️ Building GeneWeb..."
           make clean distrib
           echo "📦 Installing GeneWeb..."
-          sudo make install
+          sudo -E env "PATH=$PATH" make install
       
       - name: 🚀 Start GeneWeb server
         run: |
+          eval $(opam env)
           mkdir -p ~/geneweb-data
-          nohup geneweb -daemon -hd ~/geneweb-data -bd ~/geneweb-data -port 2317 &
+          nohup gwd -hd ~/geneweb-data -bd ~/geneweb-data -port 2317 &
           echo "⏳ Waiting for GeneWeb to start..."
           for i in {1..10}; do
             if curl -sSf http://localhost:2317 >/dev/null; then
