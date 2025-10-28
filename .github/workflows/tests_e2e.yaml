@@ -83,3 +83,55 @@ jobs:
         with:
           working-directory: tests
           browser: chrome
+          config: video=true
+        continue-on-error: true
+      
+      - name: 📊 Upload Cypress screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: tests/cypress/screenshots
+          retention-days: 7
+          if-no-files-found: ignore
+      
+      - name: 🎥 Upload Cypress videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos
+          path: tests/cypress/videos
+          retention-days: 7
+          if-no-files-found: ignore
+      
+      - name: 📋 Upload GeneWeb server logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: geneweb-logs
+          path: ~/gwd.log
+          retention-days: 7
+          if-no-files-found: ignore
+      
+      - name: 📈 Upload Cypress coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-coverage
+          path: tests/coverage
+          retention-days: 30
+          if-no-files-found: ignore
+      
+      - name: 📊 Generate coverage report
+        if: always()
+        run: |
+          cd tests
+          if [ -d "coverage" ]; then
+            npx nyc report --reporter=text-summary
+            echo "## 📊 Code Coverage Summary" >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+            npx nyc report --reporter=text >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No coverage data found"
+          fi
