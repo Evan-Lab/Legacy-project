@@ -145,7 +145,7 @@ Gap: 99.2% - 99.4% shortfall
 
 #### Real-World Parallel
 
-**Consulting Scenario:**
+**Consulting Scenario as I worked as a consultant sometime:**
 A client asks for a $5M project with a $50K budget.
 
 **Wrong Response:** "We'll do our best!" → Deliver nothing
@@ -574,7 +574,7 @@ Senior Dev: "Here's why that timeline is unrealistic,
 
 ## 15. Budget & Resource Planning
 
-### 15.1 Hypothetical Real-World Budget
+### 15.1 Hypothetical Real-World Budget with my consulting knowelge
 
 **If this were a commercial project:**
 
@@ -745,3 +745,10 @@ Week 4: Execution
    - Agile/Scrum methodologies
    - Risk management frameworks
 
+  
+ ---
+**NB**
+
+This document was made by hand and with knoweldge of Julia who has skills in both business and consulting in addition from her coding skill. This is also why also shift and documentation will be done by her as her skills and understanding is far beyond the group knoweldge.
+
+She takes the PM lead and redirect the group with strategic decision to escape this trap
