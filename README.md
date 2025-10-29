@@ -42,6 +42,7 @@ This project focuses on **Quality Assurance** and **Project Management** compete
 **Why?** Our technical analysis proved full migration impossible within constraints. We pivoted to a **consulting approach**: analyze, test, document, and provide actionable roadmap for future teams.
 
 📖 **[Read our Strategic Decision Documentation →](docs/Strategic_Decision.md)**
+📖 **[Read our Poc Log Documentation →](docs/Architecture_Log.md)**
 
 ---
 
@@ -62,6 +63,7 @@ AWKWARD LEGACY/
 │   ├── EndToEnd_TestPlan&Policy.md            # End-to-end testing strategy
 │   ├── Implementation_Certificate.md # Proof of implementation
 │   └── Quality_Assurance.md        # QA framework & metrics
+|   └── Architecture_Log.md         # Choice and Log of all our POC
 │
 ├── 📁 tests/                          # Test infrastructure
 │   ├── cypress/                       # E2E tests (477 tests, 18 suites)
@@ -83,7 +85,7 @@ AWKWARD LEGACY/
 
 ### End-to-End Testing with Cypress
 
-**📖 [Complete E2E Test Plan →](docs/EndToEnd_TestPlan&Policy.md )**
+**📖 [Complete E2E Test Plan & Policy →](docs/EndToEnd_TestPlan&Policy.md )**
 
 Our comprehensive E2E testing strategy validates all critical user workflows:
 
@@ -237,6 +239,8 @@ Each use case includes:
 ## 🚀 Certificate of our Project
 
 **📖 [Implementation Certificate →](docs/ImplementationCertificate.md)**
+**📖 [POC Log Implementation →](docs/Architecture_Log.md)**
+
 
 
 
@@ -309,6 +313,7 @@ python security_.py /geneweb
 | [09. E2E Test Plan](docs/EndToEnd_TestPlan&Policy.md)  | ✅ Complete | 477 tests documented |
 | [10. Implementation Certificate](docs/ImplementationCertificate.md)  | ✅ Complete | Proof of implementation |
 | [11. Quality Assurance](docs/QualityAssurance.md)  | ✅ Complete | QA framework & metrics |
+| [12. POC Log Implementation ](docs/Architecture_LOg.md)  | ✅ Complete | ALl POC Tryout |
 
 
 ---
@@ -376,7 +381,15 @@ docs(readme): update deployment instructions
 | **Oct 26** | Final delivery | 🟢 Complete | 477 tests passing, 11 docs finalized |
 
 **Key Pivot Point:** October 11, 2025 - Team recognized impossibility of full migration and pivoted to consulting approach based on industry validation.
+This project has been both a technical and human journey — full of challenges, learning, and perseverance.
+There were highs and lows, moments of stress, disagreements, and failed experiments. But through it all, we stayed committed and worked with the resources and availability we had.
 
+We learned how to collaborate under real project conditions: dealing with uncertainty, unexpected issues, and time constraints.
+We experienced what it means to pivot strategically when a goal becomes unrealistic, to communicate transparently as a team, and to focus on what truly brings value.
+
+From late debugging sessions to refining our E2E testing and improving documentation, every step helped us grow — not only as developers, but as future professionals capable of delivering under pressure.
+
+In the end, this project taught us that success is not just about delivering features, but about learning to adapt, to prioritize quality, and to finish strong with honesty and professionalism.
 ---
 
 ## 🎯 Success Metrics
