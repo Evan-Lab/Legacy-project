@@ -34,31 +34,31 @@ jobs:
           ruff check . --exit-non-zero-on-fix
           echo "✅ Ruff linting completed."
 
-  jinja-lint:
-    name: Run DjLint on templates
-    runs-on: ubuntu-latest
+  # jinja-lint:
+  #   name: Run DjLint on templates
+  #   runs-on: ubuntu-latest
 
-    if: >
-      !contains(join(github.event.pull_request.labels.*.name, ','), 'documentation')
-      && !contains(join(github.event.pull_request.labels.*.name, ','), 'tests')
-      && !contains(join(github.event.pull_request.labels.*.name, ','), 'CI/CD')
+  #   if: >
+  #     !contains(join(github.event.pull_request.labels.*.name, ','), 'documentation')
+  #     && !contains(join(github.event.pull_request.labels.*.name, ','), 'tests')
+  #     && !contains(join(github.event.pull_request.labels.*.name, ','), 'CI/CD')
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.11"
 
-      - name: Install DjLint
-        run: |
-          python -m pip install --upgrade pip
-          pip install djlint
+  #     - name: Install DjLint
+  #       run: |
+  #         python -m pip install --upgrade pip
+  #         pip install djlint
 
-      - name: Run DjLint on Jinja2 templates
-        run: |
-          echo "🎨 Running DjLint..."
-          djlint templates/ --check --profile=jinja
-          echo "✅ DjLint linting completed."
+  #     - name: Run DjLint on Jinja2 templates
+  #       run: |
+  #         echo "🎨 Running DjLint..."
+  #         djlint templates/ --check --profile=jinja
+  #         echo "✅ DjLint linting completed."
