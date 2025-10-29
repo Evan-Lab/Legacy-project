@@ -66,3 +66,5 @@ poetry.lock
 
 # test db
 database.db
+
+node_modules/
