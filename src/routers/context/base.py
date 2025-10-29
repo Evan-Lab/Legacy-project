@@ -75,6 +75,8 @@ async def base_context(
         },
 
         "capitalize": capitalize,
+
+        "plugin": {}
     }
 
     if hasattr(request.state, "common_context"):

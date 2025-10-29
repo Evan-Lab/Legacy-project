@@ -42,6 +42,12 @@ async def common_context(
         "bvar": {"use_cdn": "no", "css_prop": ""},
         "etc_prefix": "",
         "evar": {"lang": lang, "templ": templ},
+
+        "connections": {
+            "total": 0,
+            "friends": 0,
+            "wizards": 0,
+        }
     }
 
     if hasattr(request.state, "common_context"):

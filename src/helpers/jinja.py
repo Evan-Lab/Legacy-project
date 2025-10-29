@@ -1,5 +1,6 @@
 import hashlib
 from templates.templates import templates
+from urllib.parse import quote
 import random
 
 print("Registering Jinja2 template globals from src/helpers/jinja.py")
@@ -48,4 +49,20 @@ class RandomHelper:
 
 templates.env.globals.update(
     random=RandomHelper(),
+)
+
+def uri_encode(value: str) -> str:
+    return quote(value)
+templates.env.globals.update(
+    uri_encode=uri_encode,
+)
+
+class UrlSet:
+    def __init__(self):
+        self.urls = {}
+
+    def __getattribute__(self, name: str) -> str:
+        return ""
+templates.env.globals.update(
+    url_set=UrlSet(),
 )

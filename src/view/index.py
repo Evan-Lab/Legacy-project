@@ -4,14 +4,6 @@ from src.apps.base import BaseAppDep
 from . import render
 from src.routers import root_router
 
-
-# Example data you render under "available genealogies"
-BASES = [
-    {"slug": "smith_family", "label": "Smith Family"},
-    {"slug": "dupont_arbre", "label": "Dupont"},
-    {"slug": "ivanov_tree", "label": "Ivanov"},
-]
-
 @root_router.get("/", response_class=HTMLResponse)
 async def index(
     request: Request,
