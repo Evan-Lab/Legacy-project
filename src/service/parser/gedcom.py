@@ -1,4 +1,3 @@
-from pathlib import Path
 from gedcom.parser import Parser
 from gedcom.element.individual import IndividualElement
 

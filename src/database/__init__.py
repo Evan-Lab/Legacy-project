@@ -1,1 +1,1 @@
-from .database import get_session, init_db, SessionDep
+from .database import get_session, init_db, SessionDep  # noqa: F401

@@ -14,13 +14,13 @@ class AlphabeticalFirstNameDto(BaseModel):
     F: list[FirstNameDto] = []
     G: list[FirstNameDto] = []
     H: list[FirstNameDto] = []
-    I: list[FirstNameDto] = []
+    I: list[FirstNameDto] = []  # noqa: E741
     J: list[FirstNameDto] = []
     K: list[FirstNameDto] = []
     L: list[FirstNameDto] = []
     M: list[FirstNameDto] = []
     N: list[FirstNameDto] = []
-    O: list[FirstNameDto] = []
+    O: list[FirstNameDto] = []  # noqa: E741
     P: list[FirstNameDto] = []
     Q: list[FirstNameDto] = []
     R: list[FirstNameDto] = []

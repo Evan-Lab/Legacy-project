@@ -27,3 +27,10 @@ class BaseRepo:
     def get_all(self) -> list[Base]:
         statement = select(Base)
         return list(self.session.exec(statement).all())
+
+    def count_persons(self, base: Base) -> int:
+        statement = select(Base).where(Base.id == base.id)
+        db_base = self.session.exec(statement).one_or_none()
+        if db_base is None:
+            return 0
+        return len(db_base.individuals)
