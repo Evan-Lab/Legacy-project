@@ -60,9 +60,6 @@ traces/
 .ruff_cache/
 .venv/
 
-# Poetry
-poetry.lock
-
 # Coverage
 .coverage
 
