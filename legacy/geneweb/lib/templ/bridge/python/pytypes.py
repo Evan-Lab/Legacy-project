@@ -5,6 +5,25 @@ from typing import Callable, Union
 
 Walker = Callable[['Node'], None]
 
+NodeType = Union[
+    'AText',
+    'AVar',
+    'ATransl',
+    'AWidHei',
+    'AIf',
+    'AForEach',
+    'AFor',
+    'ADefine',
+    'AApply',
+    'ALet',
+    'AOp1',
+    'AOp2',
+    'AInt',
+    'AInclude',
+    'PUrlFor',
+]
+
+AnyType = Union[NodeType, 'Node', 'Tree']
 
 class AText(BaseModel):
     text: str
@@ -155,23 +174,7 @@ class PUrlFor(BaseModel):
         return
 
 class Node(BaseModel):
-    value: Union[
-        AText,
-        AVar,
-        ATransl,
-        AWidHei,
-        AIf,
-        AForEach,
-        AFor,
-        ADefine,
-        AApply,
-        ALet,
-        AOp1,
-        AOp2,
-        AInt,
-        AInclude,
-        PUrlFor,
-    ]
+    value: NodeType
 
     def walk(self, walker: Walker) -> None:
         walker(self)

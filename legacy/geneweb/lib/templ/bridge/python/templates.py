@@ -141,6 +141,7 @@ class Template:
         self.tree.walk(lambda node: self.nodes.append(node))
         self._rule_url_for()
         self._rule_prefix()
+        self._rule_func_name()
         self.analyze()
         print(
             f"Processed template '{self.name}' with {len(self.nodes)} nodes, "
@@ -153,6 +154,17 @@ class Template:
             if isinstance(node.value, pytypes.AVar):
                 if node.value.name == "prefix":
                     node.value = pytypes.AText(text="/")
+
+    def _rule_func_name(self):
+        for node in self.nodes:
+            if isinstance(node.value, pytypes.AApply):
+                macro = node.value.macro
+                if macro[0].isdigit():
+                    node.value.macro = f"m_{macro}"
+            if isinstance(node.value, pytypes.ADefine):
+                name = node.value.name
+                if name[0].isdigit():
+                    node.value.name = f"m_{name}"
 
     def _rule_url_for(self):
         MAPPING = {

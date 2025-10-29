@@ -16,6 +16,13 @@ class Analyser:
 
     def _count(self, counter: Dict[str, int], key: str) -> None:
         counter[key] = counter.get(key, 0) + 1
+    
+    def stats(self) -> None:
+        print("Template Analysis Statistics:")
+        print(f"Total templates analyzed: {len(self.templates)}")
+        print(f"Unique macros found: {len(self.macro_counts)}")
+        print(f"Unique variables found: {len(self.var_counts)}")
+        print(f"Templates included by others: {len(self.included_by_any)}")
 
     def analyze(self) -> None:
         # Count macros and variables across all templates
