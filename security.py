@@ -37,8 +37,8 @@ class SecurityScanner:
         
         if not self.geneweb_path.exists():
             print(f"❌ Error: GenWeb directory not found at {self.geneweb_path}")
-            print(f"   Please clone it first:")
-            print(f"   git clone the legacy project please")
+            print("   Please clone it first:")
+            print("   git clone the legacy project please")
             sys.exit(1)
     
     def check_plaintext_passwords(self) -> int:
@@ -70,7 +70,7 @@ class SecurityScanner:
                             'cwe': 'CWE-256'
                         })
                         count += 1
-            except Exception as e:
+            except Exception:
                 pass
         
         print(f"   ✓ Found {count} plain-text password issues")
@@ -97,7 +97,7 @@ class SecurityScanner:
                     if '-https' in content or '-ssl' in content or 'tls' in content.lower():
                         https_found = True
                         break
-            except:
+            except Exception:
                 pass
         
         if not https_found:
@@ -137,7 +137,7 @@ class SecurityScanner:
                         if 'csrf_token' in content or 'anti_csrf' in content:
                             csrf_found = True
                             break
-            except:
+            except Exception:
                 pass
         
         if not csrf_found:
@@ -195,8 +195,8 @@ class SecurityScanner:
                                 'cwe': 'CWE-89'
                             })
                             count += 1
-                         
-            except:
+
+            except Exception:
                 pass
         
         print(f"   ✓ Found {count} potential SQL injection risks")
@@ -241,7 +241,7 @@ class SecurityScanner:
                             count += 1
                          
                             break
-            except:
+            except Exception:
                 pass
         
         print(f"   ✓ Found {count} potential XSS vulnerabilities")
@@ -266,7 +266,7 @@ class SecurityScanner:
         })
         count = 1
         
-        print(f"   ✓ Session management: Needs improvement")
+        print("   ✓ Session management: Needs improvement")
         return count
     
     def check_file_permissions(self) -> int:
@@ -309,7 +309,7 @@ class SecurityScanner:
                             })
                             count += 1
                        
-                    except:
+                    except Exception:
                         pass
         
         print(f"   ✓ Found {count} file permission issues")
@@ -341,7 +341,7 @@ class SecurityScanner:
         })
         count = 1
         
-        print(f"   ✓ Security headers: Not configured")
+        print("   ✓ Security headers: Not configured")
         return count
     
     def generate_report(self, output_file: str = 'security_report.json') -> Dict:
@@ -419,7 +419,7 @@ class SecurityScanner:
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(report, f, indent=2, ensure_ascii=False)
    
-        print(f"\n📊 SCAN SUMMARY")
+        print("\n📊 SCAN SUMMARY")
         print(f"{'─'*70}")
         print(f"Total vulnerabilities found : {stats['total_vulnerabilities']}")
         print(f"  🔴 HIGH severity   : {stats['high']}")

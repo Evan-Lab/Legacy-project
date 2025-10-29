@@ -11,3 +11,11 @@ val parse :
     - [resolve_include] function resolves paths for included files.
     - [on_exn] callback handles exceptions raised during included template
       parsing, providing both the exception and its backtrace. *)
+
+(**/**)
+
+(** [parse_source ~cached src] parses [src] WITHOUT expanding includes. *)
+val parse_source :
+  cached:bool ->
+  Loc.source ->
+  Ast.t list

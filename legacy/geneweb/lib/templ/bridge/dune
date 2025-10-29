@@ -1,0 +1,13 @@
+; This builds a .so/.dll that contains:
+;  - your OCaml code (geneweb.templ)
+;  - the tiny OCaml entry (public_entry.ml)
+;  - your C glue (bindings.c)
+
+(executable
+ (name bridge)                      ; produces _build/default/bridge.so
+ (modes shared_object)
+ (modules bridge)             ; ONLY the tiny OCaml entry is needed here
+ (foreign_stubs
+  (language c)
+  (names bindings parsers))
+ (libraries geneweb.templ geneweb_compat fmt pp_loc))

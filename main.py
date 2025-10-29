@@ -6,8 +6,11 @@ from src import (
     static, # noqa: F401
     view,  # noqa: F401
     api,  # noqa: F401
+    routers,  # noqa: F401
+    helpers,  # noqa: F401
 )
 
+routers.register()
 
 if __name__ == "__main__":
     import uvicorn
