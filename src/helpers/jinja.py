@@ -35,12 +35,17 @@ class RandomHelper:
     def __init__(self):
         self.counter = 0
 
+    @property
     def init(self):
         pass
 
     def __getitem__(self, key):
         key = int(key)
         return random.randint(0, key - 1) if key > 0 else 0
+
+    def __call__(self, key):
+        return self[key]
+
 templates.env.globals.update(
     random=RandomHelper(),
 )

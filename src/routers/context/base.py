@@ -41,7 +41,10 @@ async def base_context(
 
     lang = request.query_params.get("lang", "en")
 
-
+    def capitalize(s: str) -> str:
+        if not s:
+            return s
+        return s[0].upper() + s[1:]
 
     context = {
         # base context
@@ -61,7 +64,17 @@ async def base_context(
 
         # evars
         "body_prop": body_prop,
-        "lang": lang
+        "lang": lang,
+
+        "base": base,
+
+        "user": {
+            "name": "",
+            "ident": "guest",
+            "key": "",
+        },
+
+        "capitalize": capitalize,
     }
 
     if hasattr(request.state, "common_context"):
