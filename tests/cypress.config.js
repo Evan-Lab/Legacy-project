@@ -9,10 +9,8 @@ module.exports = defineConfig({
     screenshotsFolder: 'cypress/screenshots',
 
     setupNodeEvents(on, config) {
-      // Définition du baseUrl
       config.baseUrl = "http://localhost:2317";
 
-      // Supprime les vidéos des specs sans échec
       on("after:spec", (spec, results) => {
         if (results && results.video) {
           const hasFailedTests = results.tests.some(test =>
