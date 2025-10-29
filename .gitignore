@@ -58,11 +58,10 @@ traces/
 .ruff_cache/
 .venv/
 
-# Poetry
-poetry.lock
-
 # Coverage
 .coverage
 
 # test db
 database.db
+
+node_modules/
