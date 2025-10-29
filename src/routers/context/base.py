@@ -1,6 +1,6 @@
 import datetime
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import Request
 
 from src.service.base import BaseDep, BasesDep
 

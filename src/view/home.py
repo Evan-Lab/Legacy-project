@@ -1,10 +1,7 @@
-import random as random_module
 
 from fastapi import Request
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 
-from src import app
 from src.apps.book import BookAppDep
 
 from . import render

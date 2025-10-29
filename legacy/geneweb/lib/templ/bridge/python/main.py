@@ -2,7 +2,6 @@ import bridge
 import jinjagen
 import templates
 import analyse
-import lint
 import os
 
 OUTPUT_DIR = "./generated_templates"
