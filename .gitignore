@@ -61,7 +61,6 @@ traces/
 .venv/
 
 # Poetry
-poetry.lock
 
 # Coverage
 .coverage
