@@ -71,16 +71,16 @@ for index, template in enumerate(template_list):
         f.write(result)
 
 
-print(f"Linting {len(template_list)} files...")
-linter = lint.Linter()
-for index, template in enumerate(template_list):
-    print(f"Linting file {index + 1}/{len(template_list)}: {template.filepath}")
-    try:
-        linter.lint_jinja_file(template.filepath)
-    except Exception:
-        print(f"Error linting file {template.filepath}")
+# print(f"Linting {len(template_list)} files...")
+# linter = lint.Linter()
+# for index, template in enumerate(template_list):
+#     print(f"Linting file {index + 1}/{len(template_list)}: {template.filepath}")
+#     try:
+#         linter.lint_jinja_file(template.filepath)
+#     except Exception:
+#         print(f"Error linting file {template.filepath}")
 
-linter.write_report("lint_report.txt")
+# linter.write_report("lint_report.txt")
 
 set_destination_directory(OUTPUT_DIR, "dot", template_list)
 

@@ -128,6 +128,10 @@ class JinjaGenerator:
         self.template = template
         self.result: str | None = None
         self.tracer = TraceLoc()
+    
+    def is_js(self) -> bool:
+        tname = self.template.name.lower()
+        return (tname.startswith("js_") or tname.endswith("_js") or tname == "js")
 
     def _rendert(self, obj: pytypes.AnyType, escape: bool) -> str:
         end_callback = self.tracer(obj)
@@ -225,11 +229,15 @@ class JinjaGenerator:
         
         def escaped_text() -> str:
             res = str(value.text)
+            if self.is_js():
+                return res
             res = res.replace(r'{%', '{% raw %}{%{% endraw %}')
             res = res.replace(r'{{', '{% raw %}{{{% endraw %}')
             res = res.replace(r'%}', '{% raw %}%}{% endraw %}')
             res = res.replace(r'}}', '{% raw %}}}{% endraw %}')
-            return " " + res + " "
+            if res[-1] == r"{" or res[0] == r"}":
+                res = "{% raw %}" + res + "{% endraw %}"
+            return res
 
         return escaped_text() if escape else unescaped_text()
 
@@ -420,7 +428,8 @@ class JinjaGenerator:
                 f"Jinja2 syntax error in generated template: {e.message} at line {e.lineno}"
             ) from e
 
-        body = reformat.formatter(format_config, body)
+        if not self.is_js():
+            body = reformat.formatter(format_config, body)
 
         result = header + body
 
