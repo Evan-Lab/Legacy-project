@@ -1,4 +1,6 @@
 legacy/geneweb/.merlin
+node_modules
+geneweb/.merlin
 
 legacy/geneweb/distribution
 
@@ -64,4 +66,5 @@ traces/
 # test db
 database.db
 
+# Node.js
 node_modules/
