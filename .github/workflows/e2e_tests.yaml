@@ -1,0 +1,126 @@
+name: Run End-to-End Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  e2e-tests:
+    runs-on: ubuntu-latest
+
+    env:
+      OPAMYES: "true"
+      OPAMJOBS: "2"
+      OPAMROOT: /home/runner/.opam
+
+    steps:
+      - name: 🧩 Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: ⚙️ Install OCaml & system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y opam ocaml make git curl \
+            libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev \
+            libnss3 libxss1 libasound2t64 xvfb xdot
+      
+      - name: 🔧 Initialize OPAM and install dependencies from geneweb.opam
+        run: |
+          echo "🔧 Initializing OPAM..."
+          opam init -y --disable-sandboxing
+          eval $(opam env)
+          echo "📥 Cloning GeneWeb..."
+          git clone https://github.com/geneweb/geneweb.git
+          cd geneweb
+          echo "📦 Installing dependencies from geneweb.opam..."
+          opam install -y . --deps-only --assume-depexts
+      
+      - name: 🧱 Build GeneWeb from source
+        run: |
+          eval $(opam env)
+          cd geneweb
+          echo "⚙️ Configuring GeneWeb..."
+          ocaml ./configure.ml
+          echo "🏗️ Building GeneWeb..."
+          make clean distrib
+      
+      - name: 📁 Copy database files to GeneWeb
+        run: |
+          echo "📋 Copying files from legacy/geneweb/library to distribution/bases..."
+          cp -r legacy/geneweb/library/* geneweb/distribution/bases/
+          echo "✅ Files copied successfully"
+          ls -la geneweb/distribution/bases/
+      
+      - name: 🚀 Start GeneWeb server
+        run: |
+          eval $(opam env)
+          cd geneweb/distribution
+          nohup ./gw/gwd -hd ./gw -p 2317 > ~/gwd.log 2>&1 &
+          echo "⏳ Waiting for GeneWeb to start..."
+          for i in {1..10}; do
+            if curl -sSf http://localhost:2317 >/dev/null 2>&1; then
+              echo "✅ GeneWeb is running!"
+              break
+            fi
+            echo "Attempt $i/10..."
+            sleep 3
+          done
+          if ! curl -sSf http://localhost:2317 >/dev/null 2>&1; then
+            echo "❌ GeneWeb failed to start. Log contents:"
+            cat ~/gwd.log
+            exit 1
+          fi
+      
+      - name: 🧰 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      
+      - name: 📦 Install Cypress dependencies
+        run: |
+          cd tests
+          npm ci
+      
+      - name: 🧪 Run Cypress E2E tests
+        id: cypress-tests
+        uses: cypress-io/github-action@v6
+        with:
+          working-directory: tests
+          browser: chrome
+          config: video=true
+        continue-on-error: true
+      
+      - name: 📊 Upload Cypress screenshots on failure
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: tests/cypress/screenshots
+          retention-days: 7
+          if-no-files-found: ignore
+      
+      - name: 🎥 Upload Cypress videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos
+          path: tests/cypress/videos
+          retention-days: 7
+          if-no-files-found: ignore
+      
+      - name: 📋 Upload GeneWeb server logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: geneweb-logs
+          path: ~/gwd.log
+          retention-days: 7
+          if-no-files-found: ignore
+      
+      - name: ❌ Fail workflow if tests failed
+        if: steps.cypress-tests.outcome == 'failure'
+        run: |
+          echo "::error::Cypress tests failed!"
+          exit 1

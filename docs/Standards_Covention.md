@@ -95,11 +95,6 @@ class InheritanceCalculator:
 ```
 
 
-### Error Handling
-
-
----
-TO BE DONE
 
 ## Testing Standards
 
@@ -156,9 +151,9 @@ Clear documentation with anything suitable and markdown
 ```
 
 ### Weekly Summary (Discord #general)
-```
 
-```
+**📖 [Complete Weekly report →](docs/Weekly_Report.md)**
+
 
 ### Issue Reporting (GitHub Issues)
 ```markdown

@@ -1,4 +1,6 @@
 legacy/geneweb/.merlin
+node_modules
+geneweb/.merlin
 
 legacy/geneweb/distribution
 
@@ -57,9 +59,6 @@ traces/
 .pytest_cache/
 .ruff_cache/
 .venv/
-
-# Poetry
-poetry.lock
 
 # Coverage
 .coverage
