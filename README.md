@@ -524,7 +524,6 @@ Before merging:
 - Prioritizing value over optics
 
 
----
 This project has been both a technical and human journey : full of challenges, learning, and perseverance.
 There were highs and lows, moments of stress, disagreements, and failed experiments. But through it all, we stayed committed and worked with the resources and availability we had.
 
